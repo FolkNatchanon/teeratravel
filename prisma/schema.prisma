@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Status {
+  active
+  inactive
+}
+
+enum BookingStatus {
+  pending
+  complete
+  cancel
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum PackageType {
+  private
+  join
+}
+
+enum TimeSlot {
+  morning
+  afternoon
+}
+
+model User {
+  user_id      Int     @id @default(autoincrement())
+  username     String  @db.VarChar(30)
+  user_fname   String  @db.VarChar(30)
+  user_lname   String  @db.VarChar(30)
+  email        String  @unique @db.VarChar(50)
+  role         String  @db.Char(1)        // "A" | "U"
+  password     String  @db.VarChar(100)
+  phone_number String  @db.Char(10)
+
+  bookings     Booking[]
+
+  @@index([role])
+}
+
+model Boat {
+  boat_id  Int    @id @default(autoincrement())
+  name     String @db.VarChar(80)
+  capacity Int
+  status   Status @default(active)
+
+  packages Package[]
+  bookings Booking[]
+
+  @@index([status])
+}
+
+model Package {
+  package_id             Int         @id @default(autoincrement())
+  name                   String      @db.VarChar(120)
+  cover_image_url        String      @db.Text
+  short_intro            String      @db.VarChar(255)
+  description            String      @db.Text
+  duration_hours         Decimal     @db.Decimal(5, 2)
+  type                   PackageType @default(private)
+  status                 Status      @default(active)
+  base_member_count      Int         @default(10)
+  base_price             Decimal     @db.Decimal(10, 2)
+  extra_price_per_person Decimal     @db.Decimal(10, 2)
+
+  boat_id                Int
+  boat                   Boat        @relation(fields: [boat_id], references: [boat_id])
+
+  bookings               Booking[]
+
+  @@index([boat_id])
+  @@index([status])
+  @@index([type])
+}
+
+model Booking {
+  booking_id      Int           @id @default(autoincrement())
+  user_id         Int
+  package_id      Int
+  boat_id         Int
+
+  trip_date       DateTime      @db.Date
+  time_slot       TimeSlot
+
+  passenger_count Int
+  total_price     Decimal       @db.Decimal(10, 2)
+
+  status          BookingStatus @default(pending)
+
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @default(now()) @updatedAt
+
+  user            User          @relation(fields: [user_id], references: [user_id])
+  package         Package       @relation(fields: [package_id], references: [package_id])
+  boat            Boat          @relation(fields: [boat_id], references: [boat_id])
+
+  passengers      Passenger[]
+
+  @@unique([boat_id, trip_date, time_slot])
+
+  @@index([user_id])
+  @@index([package_id])
+  @@index([boat_id])
+  @@index([trip_date])
+  @@index([status])
+}
+
+model Passenger {
+  passenger_id Int    @id @default(autoincrement())
+  booking_id   Int
+
+  fname        String @db.VarChar(60)
+  lname        String @db.VarChar(60)
+  age          Int
+  gender       Gender
+
+  booking      Booking @relation(fields: [booking_id], references: [booking_id], onDelete: Cascade)
+
+  @@index([booking_id])
+}
