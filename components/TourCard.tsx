@@ -30,11 +30,11 @@ export default function TourCard({ id, title, price, maxPeople, duration, imageS
                     <h3 className="text-xl font-bold text-gray-900">{title}</h3>
                     <div className="text-right">
                         <span className="block text-xl font-bold text-blue-600">{price.toLocaleString()}฿</span>
-                        <span className="text-sm text-gray-500 font-medium">/ {maxPeople}คน</span>
+                        <span className="text-sm text-gray-600 font-medium">/ {maxPeople}คน</span>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6 text-gray-600 text-sm mb-8">
+                <div className="flex items-center gap-6 text-gray-700 text-sm mb-8">
                     <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         <span>{duration} ชั่วโมง</span>

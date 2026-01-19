@@ -55,7 +55,7 @@ export default function LoginPage() {
                             <div>
                                 <label
                                     htmlFor="email"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-bold text-gray-900"
                                 >
                                     อีเมล
                                 </label>
@@ -65,7 +65,7 @@ export default function LoginPage() {
                                     type="email"
                                     autoComplete="email"
                                     required
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
                                     placeholder="example@email.com"
                                 />
                             </div>
@@ -73,7 +73,7 @@ export default function LoginPage() {
                             <div>
                                 <label
                                     htmlFor="password"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-bold text-gray-900"
                                 >
                                     รหัสผ่าน
                                 </label>
@@ -83,7 +83,7 @@ export default function LoginPage() {
                                     type="password"
                                     autoComplete="current-password"
                                     required
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
                                     placeholder="••••••••"
                                 />
                             </div>

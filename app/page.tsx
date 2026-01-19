@@ -1,37 +1,18 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import TourCard from "@/components/TourCard";
 import { ArrowRight } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-// Mock Data for Packages
-const MOCK_PACKAGES = [
-  {
-    id: 1,
-    title: "Teera Travel 1",
-    price: 6900,
-    maxPeople: 24,
-    duration: 3,
-    imageSrc: "/hero.png", // Using hero image as placeholder for package too
-  },
-  {
-    id: 2,
-    title: "Teera Travel 2",
-    price: 8900,
-    maxPeople: 24,
-    duration: 3,
-    imageSrc: "/hero.png",
-  },
-  {
-    id: 3,
-    title: "Teera Travel 3",
-    price: 15900,
-    maxPeople: 30,
-    duration: 5,
-    imageSrc: "/hero.png",
-  },
-];
+export const revalidate = 3600; // Revalidate every hour
 
-export default function Home() {
+export default async function Home() {
+  const packages = await prisma.package.findMany({
+    where: { status: "active" },
+    orderBy: { package_id: 'asc' },
+    take: 6,
+  });
+
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
@@ -77,19 +58,25 @@ export default function Home() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {MOCK_PACKAGES.map((pkg) => (
-            <TourCard
-              key={pkg.id}
-              id={pkg.id}
-              title={pkg.title}
-              price={pkg.price}
-              maxPeople={pkg.maxPeople}
-              duration={pkg.duration}
-              imageSrc={pkg.imageSrc}
-            />
-          ))}
-        </div>
+        {packages.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {packages.map((pkg) => (
+              <TourCard
+                key={pkg.package_id}
+                id={pkg.package_id}
+                title={pkg.name}
+                price={Number(pkg.base_price)}
+                maxPeople={pkg.base_member_count}
+                duration={Number(pkg.duration_hours)}
+                imageSrc={pkg.cover_image_url}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-gray-500 py-10">
+            <p className="text-xl">ยังไม่มีแพ็คเกจทัวร์ในขณะนี้</p>
+          </div>
+        )}
       </section>
     </main>
   );

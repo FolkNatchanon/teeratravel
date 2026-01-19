@@ -1,39 +1,39 @@
 import BookingCard from "@/components/BookingCard";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
 
-const MOCK_BOOKINGS = [
-    {
-        id: 101,
-        title: "ทริปดำน้ำเกาะเต่า",
-        location: "เกาะเต่า, สุราษฎร์ธานี",
-        date: "15 เม.ย. 2024",
-        status: "upcoming" as const,
-        price: 4500,
-        people: 2,
-        imageSrc: "/hero.png",
-    },
-    {
-        id: 102,
-        title: "ทัวร์หมู่เกาะสิมิลัน",
-        location: "พังงา",
-        date: "10 ธ.ค. 2023",
-        status: "completed" as const,
-        price: 8900,
-        people: 4,
-        imageSrc: "/hero.png",
-    },
-    {
-        id: 103,
-        title: "ล่องเรือแม่น้ำเจ้าพระยา",
-        location: "กรุงเทพมหานคร",
-        date: "25 พ.ย. 2023",
-        status: "cancelled" as const,
-        price: 2200,
-        people: 2,
-        imageSrc: "/hero.png",
-    },
-];
+export default async function BookingHistoryPage() {
+    const session = await getSession();
+    if (!session || !session.userId) {
+        redirect("/login");
+    }
 
-export default function BookingHistoryPage() {
+    const bookings = await prisma.booking.findMany({
+        where: { user_id: session.userId },
+        include: {
+            package: true
+        },
+        orderBy: { created_at: 'desc' }
+    });
+
+    const mappedBookings = bookings.map(b => ({
+        id: b.booking_id,
+        title: b.package.name,
+        location: b.package.short_intro, // Using short intro as location/desc context for now
+        date: new Date(b.trip_date).toLocaleDateString('th-TH', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        }),
+        status: (b.status === 'pending' ? 'upcoming' :
+            b.status === 'complete' ? 'completed' :
+                'cancelled') as "upcoming" | "completed" | "cancelled",
+        price: Number(b.total_price),
+        people: b.passenger_count,
+        imageSrc: b.package.cover_image_url || "/placeholder.png",
+    }));
+
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto space-y-8">
@@ -45,12 +45,12 @@ export default function BookingHistoryPage() {
                 </div>
 
                 <div className="space-y-4">
-                    {MOCK_BOOKINGS.map((booking) => (
+                    {mappedBookings.map((booking) => (
                         <BookingCard key={booking.id} {...booking} />
                     ))}
                 </div>
 
-                {MOCK_BOOKINGS.length === 0 && (
+                {mappedBookings.length === 0 && (
                     <div className="text-center py-12 bg-white rounded-xl border border-gray-200 border-dashed">
                         <p className="text-gray-500 text-lg">คุณยังไม่มีประวัติการจอง</p>
                     </div>

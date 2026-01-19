@@ -13,6 +13,17 @@ interface BookingCardProps {
     people: number;
 }
 
+// Helper to validate image URL (reused logic)
+function getValidImageUrl(url: string | null) {
+    if (!url) return "/placeholder.png";
+    try {
+        new URL(url); // Will throw if invalid
+        return url;
+    } catch {
+        return "/placeholder.png";
+    }
+}
+
 export default function BookingCard({
     id,
     title,
@@ -41,7 +52,7 @@ export default function BookingCard({
                 {/* Image Section */}
                 <div className="relative w-full md:w-48 h-48 md:h-auto shrink-0">
                     <Image
-                        src={imageSrc}
+                        src={getValidImageUrl(imageSrc)}
                         alt={title}
                         fill
                         className="object-cover"
@@ -60,17 +71,17 @@ export default function BookingCard({
                             </span>
                         </div>
 
-                        <div className="flex items-center text-gray-500 mb-2">
+                        <div className="flex items-center text-gray-600 mb-2">
                             <MapPin className="w-4 h-4 mr-1" />
-                            <span className="text-sm">{location}</span>
+                            <span className="text-sm line-clamp-1">{location}</span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
-                            <div className="flex items-center text-gray-600">
+                            <div className="flex items-center text-gray-700">
                                 <Calendar className="w-4 h-4 mr-2" />
                                 <span className="text-sm">{date}</span>
                             </div>
-                            <div className="flex items-center text-gray-600">
+                            <div className="flex items-center text-gray-700">
                                 <Users className="w-4 h-4 mr-2" />
                                 <span className="text-sm">{people} ท่าน</span>
                             </div>
@@ -79,16 +90,17 @@ export default function BookingCard({
 
                     <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-100">
                         <div>
-                            <span className="text-xs text-gray-500">ราคารวม</span>
+                            <span className="text-xs text-gray-600">ราคารวม</span>
                             <p className="text-lg font-bold text-blue-600">฿{price.toLocaleString()}</p>
                         </div>
 
-                        <Link
-                            href={`/bookings/${id}`}
-                            className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                        {/* Link to nowhere for now, or could map to a detail page if it existed */}
+                        <button
+                            className="px-4 py-2 bg-gray-100 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed"
+                            disabled
                         >
                             ดูรายละเอียด
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </div>

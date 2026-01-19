@@ -57,7 +57,7 @@ export default function RegisterPage() {
                                 <div>
                                     <label
                                         htmlFor="firstName"
-                                        className="block text-sm font-medium text-gray-700"
+                                        className="block text-sm font-bold text-gray-900"
                                     >
                                         ชื่อจริง
                                     </label>
@@ -66,7 +66,7 @@ export default function RegisterPage() {
                                         name="firstName"
                                         type="text"
                                         required
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                                     />
                                     {state?.errors?.firstName && (
                                         <p className="mt-1 text-sm text-red-600">{state.errors.firstName[0]}</p>
@@ -75,7 +75,7 @@ export default function RegisterPage() {
                                 <div>
                                     <label
                                         htmlFor="lastName"
-                                        className="block text-sm font-medium text-gray-700"
+                                        className="block text-sm font-bold text-gray-900"
                                     >
                                         นามสกุล
                                     </label>
@@ -84,7 +84,7 @@ export default function RegisterPage() {
                                         name="lastName"
                                         type="text"
                                         required
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                                     />
                                     {state?.errors?.lastName && (
                                         <p className="mt-1 text-sm text-red-600">{state.errors.lastName[0]}</p>
@@ -95,7 +95,7 @@ export default function RegisterPage() {
                             <div>
                                 <label
                                     htmlFor="username"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-bold text-gray-900"
                                 >
                                     ชื่อผู้ใช้ (Username)
                                 </label>
@@ -104,7 +104,7 @@ export default function RegisterPage() {
                                     name="username"
                                     type="text"
                                     required
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                                 />
                                 {state?.errors?.username && (
                                     <p className="mt-1 text-sm text-red-600">{state.errors.username[0]}</p>
@@ -114,7 +114,7 @@ export default function RegisterPage() {
                             <div>
                                 <label
                                     htmlFor="email"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-bold text-gray-900"
                                 >
                                     อีเมล
                                 </label>
@@ -124,7 +124,7 @@ export default function RegisterPage() {
                                     type="email"
                                     autoComplete="email"
                                     required
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                                 />
                                 {state?.errors?.email && (
                                     <p className="mt-1 text-sm text-red-600">{state.errors.email[0]}</p>
@@ -134,7 +134,7 @@ export default function RegisterPage() {
                             <div>
                                 <label
                                     htmlFor="phone"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-bold text-gray-900"
                                 >
                                     เบอร์โทรศัพท์
                                 </label>
@@ -143,7 +143,7 @@ export default function RegisterPage() {
                                     name="phone"
                                     type="tel"
                                     required
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                                 />
                                 {state?.errors?.phone && (
                                     <p className="mt-1 text-sm text-red-600">{state.errors.phone[0]}</p>
@@ -153,7 +153,7 @@ export default function RegisterPage() {
                             <div>
                                 <label
                                     htmlFor="password"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-bold text-gray-900"
                                 >
                                     รหัสผ่าน
                                 </label>
@@ -162,7 +162,7 @@ export default function RegisterPage() {
                                     name="password"
                                     type="password"
                                     required
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                                 />
                                 {state?.errors?.password && (
                                     <p className="mt-1 text-sm text-red-600">{state.errors.password[0]}</p>
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                             <div>
                                 <label
                                     htmlFor="confirmPassword"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-bold text-gray-900"
                                 >
                                     ยืนยันรหัสผ่าน
                                 </label>
@@ -181,7 +181,7 @@ export default function RegisterPage() {
                                     name="confirmPassword"
                                     type="password"
                                     required
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                                 />
                                 {state?.errors?.confirmPassword && (
                                     <p className="mt-1 text-sm text-red-600">{state.errors.confirmPassword[0]}</p>
