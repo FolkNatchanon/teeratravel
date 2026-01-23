@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Clock, Users, Anchor, MapPin, CheckCircle } from "lucide-react";
 import BookingForm from "@/components/BookingForm";
 
+import { getSession } from "@/lib/session";
+
 export default async function PackageDetailPage({ params }: { params: { id: string } }) {
     // Await params in case it's a promise (Next.js 15+ change, safe to await)
     const resolvedParams = await params;
@@ -12,6 +14,8 @@ export default async function PackageDetailPage({ params }: { params: { id: stri
     if (isNaN(packageId)) {
         notFound();
     }
+
+    const session = await getSession();
 
     const pkg = await prisma.package.findUnique({
         where: { package_id: packageId },
@@ -53,22 +57,22 @@ export default async function PackageDetailPage({ params }: { params: { id: stri
                         <div className="flex flex-col items-center justify-center text-center p-2">
                             <Clock className="w-6 h-6 text-blue-600 mb-2" />
                             <span className="text-sm text-gray-600">Duration</span>
-                            <span className="font-semibold">{Number(pkg.duration_hours)} Hours</span>
+                            <span className="font-semibold text-gray-600">{Number(pkg.duration_hours)} Hours</span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center p-2">
                             <Users className="w-6 h-6 text-blue-600 mb-2" />
                             <span className="text-sm text-gray-600">Capacity</span>
-                            <span className="font-semibold">Max {pkg.boat.capacity}</span>
+                            <span className="font-semibold text-gray-600">Max {pkg.boat.capacity}</span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center p-2">
                             <Anchor className="w-6 h-6 text-blue-600 mb-2" />
                             <span className="text-sm text-gray-600">Boat</span>
-                            <span className="font-semibold">{pkg.boat.name}</span>
+                            <span className="font-semibold text-gray-600">{pkg.boat.name}</span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center p-2">
                             <MapPin className="w-6 h-6 text-blue-600 mb-2" />
                             <span className="text-sm text-gray-600">Location</span>
-                            <span className="font-semibold">Phuket</span>
+                            <span className="font-semibold text-gray-600">Koh Talu</span>
                         </div>
                     </div>
 
@@ -98,6 +102,7 @@ export default async function PackageDetailPage({ params }: { params: { id: stri
                             extraPricePerPerson={Number(pkg.extra_price_per_person)}
                             maxCapacity={pkg.boat.capacity}
                             basePrice={Number(pkg.base_price)}
+                            isLoggedIn={!!session}
                         />
 
                         <div className="mt-6 pt-6 border-t border-gray-100 space-y-3">

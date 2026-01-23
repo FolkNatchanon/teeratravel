@@ -2,9 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import AuthGuardModal from "./AuthGuardModal";
 
-export default function NavLinks() {
+interface NavLinksProps {
+    isLoggedIn: boolean;
+}
+
+export default function NavLinks({ isLoggedIn }: NavLinksProps) {
     const pathname = usePathname();
+    const [showAuthModal, setShowAuthModal] = useState(false);
 
     const isActive = (path: string) => {
         if (path === '/') return pathname === '/';
@@ -12,38 +19,51 @@ export default function NavLinks() {
     };
 
     return (
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-            <Link
-                href="/"
-                className={`transition-colors ${isActive('/') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
-            >
-                หน้าแรก
-                {isActive('/') && <div className="h-0.5 w-full bg-blue-600 mt-0.5 rounded-full" />}
-            </Link>
+        <>
+            <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+                <Link
+                    href="/"
+                    className={`transition-colors ${isActive('/') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
+                >
+                    หน้าแรก
+                    {isActive('/') && <div className="h-0.5 w-full bg-blue-600 mt-0.5 rounded-full" />}
+                </Link>
 
-            <Link
-                href="/packages"
-                className={`transition-colors ${isActive('/packages') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
-            >
-                แพ็คเกจทัวร์
-                {isActive('/packages') && <div className="h-0.5 w-full bg-blue-600 mt-0.5 rounded-full" />}
-            </Link>
+                <Link
+                    href="/packages"
+                    className={`transition-colors ${isActive('/packages') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
+                >
+                    แพ็คเกจทัวร์
+                    {isActive('/packages') && <div className="h-0.5 w-full bg-blue-600 mt-0.5 rounded-full" />}
+                </Link>
 
-            <Link
-                href="/booking-history"
-                className={`transition-colors relative group ${isActive('/booking-history') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
-            >
-                ประวัติการจองทริป
-                {isActive('/booking-history') && <div className="h-0.5 w-full bg-blue-600 mt-0.5 rounded-full absolute -bottom-1" />}
-            </Link>
+                <Link
+                    href="/booking-history"
+                    onClick={(e) => {
+                        if (!isLoggedIn) {
+                            e.preventDefault();
+                            setShowAuthModal(true);
+                        }
+                    }}
+                    className={`transition-colors relative group ${isActive('/booking-history') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
+                >
+                    ประวัติการจองทริป
+                    {isActive('/booking-history') && <div className="h-0.5 w-full bg-blue-600 mt-0.5 rounded-full absolute -bottom-1" />}
+                </Link>
 
-            <Link
-                href="/contact"
-                className={`transition-colors relative group ${isActive('/contact') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
-            >
-                ติดต่อเรา-แผนที่
-                {isActive('/contact') && <div className="h-0.5 w-full bg-blue-600 mt-0.5 rounded-full absolute -bottom-1" />}
-            </Link>
-        </div>
+                <Link
+                    href="/contact"
+                    className={`transition-colors relative group ${isActive('/contact') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
+                >
+                    ติดต่อเรา-แผนที่
+                    {isActive('/contact') && <div className="h-0.5 w-full bg-blue-600 mt-0.5 rounded-full absolute -bottom-1" />}
+                </Link>
+            </div>
+
+            <AuthGuardModal
+                isOpen={showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+            />
+        </>
     );
 }

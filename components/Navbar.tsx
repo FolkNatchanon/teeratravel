@@ -24,7 +24,7 @@ export default async function Navbar() {
                 </Link>
 
                 {/* Links */}
-                <NavLinks />
+                <NavLinks isLoggedIn={!!session} />
 
                 {/* User Profile */}
                 <div className="flex items-center gap-4">
