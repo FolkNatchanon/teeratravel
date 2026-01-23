@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Anchor } from "lucide-react";
+import { Plus, Pencil, Anchor } from "lucide-react";
+import DeleteBoatButton from "@/components/DeleteBoatButton";
 
 export default async function AdminBoatsPage() {
     const boats = await prisma.boat.findMany({
@@ -29,7 +30,6 @@ export default async function AdminBoatsPage() {
                                 <th className="px-6 py-4 font-medium">ID</th>
                                 <th className="px-6 py-4 font-medium">Name</th>
                                 <th className="px-6 py-4 font-medium">Capacity</th>
-                                <th className="px-6 py-4 font-medium">Status</th>
                                 <th className="px-6 py-4 font-medium">Usage</th>
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
@@ -45,22 +45,17 @@ export default async function AdminBoatsPage() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-600">{boat.capacity}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                      ${boat.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                            {boat.status}
-                                        </span>
-                                    </td>
                                     <td className="px-6 py-4 text-sm text-gray-600">
                                         {boat._count.packages} Packages, {boat._count.bookings} Bookings
                                     </td>
                                     <td className="px-6 py-4 text-right space-x-2">
                                         <Link
-                                            href={`/admin/boats/${boat.boat_id}`}
+                                            href={`/admin/boats/${boat.boat_id}/edit`}
                                             className="inline-flex p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                                         >
                                             <Pencil className="w-4 h-4" />
                                         </Link>
+                                        <DeleteBoatButton boatId={boat.boat_id} />
                                     </td>
                                 </tr>
                             ))}

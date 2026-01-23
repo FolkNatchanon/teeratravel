@@ -58,7 +58,7 @@ export default async function PackageDetailPage({ params }: { params: { id: stri
                         <div className="flex flex-col items-center justify-center text-center p-2">
                             <Users className="w-6 h-6 text-blue-600 mb-2" />
                             <span className="text-sm text-gray-600">Capacity</span>
-                            <span className="font-semibold">Max {pkg.base_member_count}</span>
+                            <span className="font-semibold">Max {pkg.boat.capacity}</span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center p-2">
                             <Anchor className="w-6 h-6 text-blue-600 mb-2" />

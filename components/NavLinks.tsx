@@ -22,6 +22,14 @@ export default function NavLinks() {
             </Link>
 
             <Link
+                href="/packages"
+                className={`transition-colors ${isActive('/packages') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
+            >
+                แพ็คเกจทัวร์
+                {isActive('/packages') && <div className="h-0.5 w-full bg-blue-600 mt-0.5 rounded-full" />}
+            </Link>
+
+            <Link
                 href="/booking-history"
                 className={`transition-colors relative group ${isActive('/booking-history') ? 'text-blue-600 font-bold' : 'hover:text-black'}`}
             >

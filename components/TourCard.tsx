@@ -6,12 +6,13 @@ interface TourCardProps {
     id: number;
     title: string;
     price: number;
-    maxPeople: number;
+    baseMemberCount: number; // For price calculation
+    maxPeople: number;      // Boat capacity
     duration: number; // hours
     imageSrc: string;
 }
 
-export default function TourCard({ id, title, price, maxPeople, duration, imageSrc }: TourCardProps) {
+export default function TourCard({ id, title, price, baseMemberCount, maxPeople, duration, imageSrc }: TourCardProps) {
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full">
             {/* Image */}
@@ -30,7 +31,7 @@ export default function TourCard({ id, title, price, maxPeople, duration, imageS
                     <h3 className="text-xl font-bold text-gray-900">{title}</h3>
                     <div className="text-right">
                         <span className="block text-xl font-bold text-blue-600">{price.toLocaleString()}฿</span>
-                        <span className="text-sm text-gray-600 font-medium">/ {maxPeople}คน</span>
+                        <span className="text-sm text-gray-600 font-medium">/ {baseMemberCount}คน</span>
                     </div>
                 </div>
 

@@ -1,83 +1,77 @@
 import Link from "next/link";
 import Image from "next/image";
-import TourCard from "@/components/TourCard";
-import { ArrowRight } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 export const revalidate = 3600; // Revalidate every hour
 
-export default async function Home() {
-  const packages = await prisma.package.findMany({
-    where: { status: "active" },
-    orderBy: { package_id: 'asc' },
-    take: 6,
-  });
-
+export default function Home() {
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-[600px] w-full flex items-center justify-center text-center px-4">
+      <section className="relative h-[80vh] w-full flex items-center justify-center text-center px-4 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/hero.png"
-            alt="Beautiful Beach"
+            src="/Koh_Talu.png"
+            alt="Koh Talu Beach"
             fill
-            className="object-cover"
+            className="object-cover brightness-75"
             priority
+            quality={100}
           />
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/20" />
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto text-white space-y-8 mt-16">
-          <h1 className="text-4xl md:text-6xl font-bold drop-shadow-lg leading-tight">
-            ลองค้นหาทริปในฝันของคุณไปกับเราสิ!
-          </h1>
-          <p className="text-xl md:text-2xl font-medium drop-shadow-md text-white/90">
-            สัมผัสประสบการณ์มหัศจรรย์ของการดำน้ำ <br className="hidden md:block" />
-            ด้วยทัวร์นำเที่ยวผู้เชี่ยวชาญและอุปกรณ์ระดับพรีเมียมของเรา
+        <div className="relative z-10 max-w-5xl mx-auto text-white space-y-10 animate-in fade-in zoom-in duration-1000">
+          <div className="space-y-4">
+            <h1 className="text-5xl md:text-7xl font-extrabold drop-shadow-2xl leading-tight tracking-tight">
+              เปิดประสบการณ์ใหม่ <br />
+              <span className="text-cyan-400">แห่งท้องทะเลไทย</span>
+            </h1>
+          </div>
+
+          <p className="text-xl md:text-2xl font-light drop-shadow-lg text-white/90 max-w-3xl mx-auto leading-relaxed">
+            สัมผัสความงามของธรรมชาติ ดำน้ำดูปะการัง และพักผ่อนกับทริปสุดพิเศษ
+            <br />ที่คัดสรรมาเพื่อคุณโดยเฉพาะ
           </p>
 
-          <Link
-            href="/quiz"
-            className="inline-flex items-center gap-2 bg-white text-black px-8 py-3 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg"
-          >
-            เริ่มทำแบบทดสอบ
-            <ArrowRight className="w-5 h-5" />
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <Link
+              href="/packages"
+              className="group inline-flex items-center gap-3 bg-cyan-500 hover:bg-cyan-400 text-white px-8 py-4 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-xl hover:shadow-cyan-500/30"
+            >
+              ดูแพ็คเกจทัวร์
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+
+            <Link
+              href="/contact"
+              className="group inline-flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/50 px-8 py-4 rounded-full font-bold text-lg transition-all hover:border-white"
+            >
+              ติดต่อเรา
+              <ArrowUpRight className="w-5 h-5 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Packages Section */}
-      <section className="py-20 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            เลือกแพ็คเกจของคุณ
-          </h2>
+      {/* Feature/Teaser Section (Optional visual filler) */}
+      <section className="py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto space-y-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight">
+              ทำไมต้องเลือกเดินทางกับเรา?
+            </h2>
+            <p className="text-lg text-slate-600 leading-relaxed">
+              เราให้บริการนำเที่ยวด้วยเรือสปีดโบ๊ทคุณภาพสูง พร้อมกัปตันและลูกเรือผู้เชี่ยวชาญ
+              ที่จะพาคุณไปสัมผัสจุดชมวิวและจุดดำน้ำที่สวยที่สุด พร้อมการบริการที่ใส่ใจในทุกรายละเอียด
+            </p>
+          </div>
         </div>
-
-        {packages.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {packages.map((pkg) => (
-              <TourCard
-                key={pkg.package_id}
-                id={pkg.package_id}
-                title={pkg.name}
-                price={Number(pkg.base_price)}
-                maxPeople={pkg.base_member_count}
-                duration={Number(pkg.duration_hours)}
-                imageSrc={pkg.cover_image_url}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center text-gray-500 py-10">
-            <p className="text-xl">ยังไม่มีแพ็คเกจทัวร์ในขณะนี้</p>
-          </div>
-        )}
       </section>
     </main>
   );
 }
+

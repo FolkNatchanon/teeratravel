@@ -41,8 +41,8 @@ export default function BookingCard({
     };
 
     const statusText = {
-        upcoming: "กำลังมาถึง",
-        completed: "สำเร็จ",
+        upcoming: "รอดำเนินการ",
+        completed: "ยืนยันการจอง",
         cancelled: "ยกเลิก",
     };
 
@@ -94,13 +94,12 @@ export default function BookingCard({
                             <p className="text-lg font-bold text-blue-600">฿{price.toLocaleString()}</p>
                         </div>
 
-                        {/* Link to nowhere for now, or could map to a detail page if it existed */}
-                        <button
-                            className="px-4 py-2 bg-gray-100 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed"
-                            disabled
+                        <Link
+                            href={`/booking-history/${id}`}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                         >
                             ดูรายละเอียด
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

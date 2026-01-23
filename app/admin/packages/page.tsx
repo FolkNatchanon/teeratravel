@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Eye } from "lucide-react";
+import { Plus, Pencil, Eye } from "lucide-react";
 import Image from "next/image";
+import DeletePackageButton from "@/components/DeletePackageButton";
 
 // Helper to validate image URL
 function getValidImageUrl(url: string | null) {
@@ -89,9 +90,7 @@ export default async function AdminPackagesPage() {
                             >
                                 <Pencil className="w-5 h-5" />
                             </Link>
-                            <button className="inline-flex items-center justify-center p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                                <Trash2 className="w-5 h-5" />
-                            </button>
+                            <DeletePackageButton packageId={pkg.package_id} />
                         </div>
                     </div>
                 ))}

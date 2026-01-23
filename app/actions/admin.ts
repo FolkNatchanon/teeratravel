@@ -137,7 +137,7 @@ export async function updateBookingStatus(formData: FormData) {
 const BoatSchema = z.object({
     name: z.string().min(1, "Name is required"),
     capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
-    status: z.enum(["active", "inactive"]),
+    // Status is removed from UI, defaults to 'active'
 });
 
 export async function createBoat(prevState: any, formData: FormData) {
@@ -146,7 +146,6 @@ export async function createBoat(prevState: any, formData: FormData) {
     const validatedFields = BoatSchema.safeParse({
         name: formData.get("name"),
         capacity: formData.get("capacity"),
-        status: formData.get("status"),
     });
 
     if (!validatedFields.success) {
@@ -175,4 +174,85 @@ export async function createBoatAction(prevState: any, formData: FormData) {
         redirect("/admin/boats");
     }
     return result;
+}
+
+export async function updateBoat(prevState: any, formData: FormData) {
+    await checkAdmin();
+    const boatId = Number(formData.get("boat_id"));
+
+    if (!boatId) {
+        return { message: "Boat ID is required" };
+    }
+
+    const validatedFields = BoatSchema.safeParse({
+        name: formData.get("name"),
+        capacity: formData.get("capacity"),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: "Validation failed"
+        };
+    }
+
+    try {
+        await prisma.boat.update({
+            where: { boat_id: boatId },
+            data: validatedFields.data
+        });
+    } catch (e) {
+        console.error(e);
+        return { message: "Failed to update boat" };
+    }
+
+    revalidatePath("/admin/boats");
+    // Revalidate the specific edit page as well just in case
+    revalidatePath(`/admin/boats/${boatId}/edit`);
+    return { message: "Boat updated successfully" };
+}
+
+export async function updateBoatAction(prevState: any, formData: FormData) {
+    const result = await updateBoat(prevState, formData);
+    if (result?.message === "Boat updated successfully") {
+        redirect("/admin/boats");
+    }
+    return result;
+}
+
+export async function deletePackage(packageId: number) {
+    await checkAdmin();
+
+    if (!packageId) return { message: "Package ID missing" };
+
+    try {
+        await prisma.package.delete({
+            where: { package_id: packageId },
+        });
+    } catch (e) {
+        console.error("Failed to delete package", e);
+        return { message: "Failed to delete package" };
+    }
+
+    revalidatePath("/admin/packages");
+    return { message: "Package deleted successfully" };
+}
+
+export async function deleteBoat(boatId: number) {
+    await checkAdmin();
+
+    if (!boatId) return { message: "Boat ID missing" };
+
+    try {
+        await prisma.boat.delete({
+            where: { boat_id: boatId },
+        });
+    } catch (e) {
+        console.error("Failed to delete boat", e);
+        // Boat might be used in packages or bookings
+        return { message: "Failed to delete boat. It might be in use." };
+    }
+
+    revalidatePath("/admin/boats");
+    return { message: "Boat deleted successfully" };
 }

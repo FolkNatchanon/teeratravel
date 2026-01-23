@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { User } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { logout } from "@/app/actions/auth";
@@ -12,10 +13,14 @@ export default async function Navbar() {
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                        <span className="text-2xl">🐯</span>
-                    </div>
-                    <span className="text-xl font-bold tracking-tight text-gray-900">Teera Travel</span>
+                    <Image
+                        src="/TeeraTravelLogo.png"
+                        alt="Teera Travel Logo"
+                        width={50}
+                        height={50}
+                        className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <span className="text-[24px] font-bold tracking-tight text-gray-900">Teera Travel</span>
                 </Link>
 
                 {/* Links */}
@@ -33,7 +38,7 @@ export default async function Navbar() {
                                     Admin Console
                                 </Link>
                             )}
-                            <div className="flex items-center gap-2 text-sm font-medium">
+                            <div className="flex items-center gap-2 text-sm font-medium text-black font-extrabold">
                                 <User className="w-5 h-5" />
                                 <span>{session.username}</span>
                             </div>

@@ -1,7 +1,6 @@
 
 import { prisma } from "@/lib/prisma";
-import { updateBookingStatus } from "@/app/actions/admin";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import BookingStatusDropdown from "@/components/BookingStatusDropdown";
 
 export default async function AdminBookingsPage() {
     const bookings = await prisma.booking.findMany({
@@ -54,37 +53,18 @@ export default async function AdminBookingsPage() {
                                         ฿{Number(booking.total_price).toLocaleString()}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                      ${booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                booking.status === 'complete' ? 'bg-green-100 text-green-800' :
-                                                    'bg-red-100 text-red-800'}`}>
-                                            {booking.status}
-                                        </span>
+                                        <BookingStatusDropdown
+                                            bookingId={booking.booking_id}
+                                            currentStatus={booking.status}
+                                        />
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            {booking.status === 'pending' && (
-                                                <form action={updateBookingStatus}>
-                                                    <input type="hidden" name="bookingId" value={booking.booking_id} />
-                                                    <input type="hidden" name="status" value="complete" />
-                                                    <button title="Confirm Payment" className="p-1 text-green-600 hover:bg-green-50 rounded">
-                                                        <CheckCircle className="w-5 h-5" />
-                                                    </button>
-                                                </form>
-                                            )}
-                                            {(booking.status === 'pending' || booking.status === 'complete') && (
-                                                <form action={updateBookingStatus}>
-                                                    <input type="hidden" name="bookingId" value={booking.booking_id} />
-                                                    <input type="hidden" name="status" value="cancel" />
-                                                    <button title="Cancel Booking" className="p-1 text-red-600 hover:bg-red-50 rounded">
-                                                        <XCircle className="w-5 h-5" />
-                                                    </button>
-                                                </form>
-                                            )}
-                                            {booking.status === 'cancel' && (
-                                                <span className="text-gray-400 text-xs">Cancelled</span>
-                                            )}
-                                        </div>
+                                        <a
+                                            href={`/admin/bookings/${booking.booking_id}`}
+                                            className="text-blue-600 hover:text-blue-900 text-xs font-medium bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
+                                        >
+                                            View Details
+                                        </a>
                                     </td>
                                 </tr>
                             ))}
@@ -95,3 +75,4 @@ export default async function AdminBookingsPage() {
         </div>
     );
 }
+

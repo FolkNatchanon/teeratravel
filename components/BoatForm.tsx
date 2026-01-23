@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { createBoatAction } from "@/app/actions/admin";
+import { createBoatAction, updateBoatAction } from "@/app/actions/admin";
 import Link from "next/link";
 
 const initialState = {
@@ -9,12 +9,24 @@ const initialState = {
     errors: {} as Record<string, string[]> | undefined,
 };
 
-export default function BoatForm() {
+type Boat = {
+    boat_id: number;
+    name: string;
+    capacity: number;
+    status: "active" | "inactive";
+};
+
+export default function BoatForm({ boat }: { boat?: Boat }) {
     // @ts-ignore
-    const [state, formAction] = useActionState(createBoatAction, initialState);
+    const [state, formAction] = useActionState(
+        boat ? updateBoatAction : createBoatAction,
+        initialState
+    );
 
     return (
         <form action={formAction} className="space-y-6">
+            {boat && <input type="hidden" name="boat_id" value={boat.boat_id} />}
+
             {state?.message && (
                 <div className={`p-4 rounded-lg text-sm ${state.message.includes("success") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                     {state.message}
@@ -23,24 +35,32 @@ export default function BoatForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="col-span-2">
-                    <label className="block text-sm font-bold text-gray-900 mb-1">Boat Name</label>
-                    <input type="text" name="name" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 placeholder-gray-500" placeholder="e.g. The Pearl" />
+                    <label className="block text-sm font-bold text-gray-800 mb-1">Boat Name</label>
+                    <input
+                        type="text"
+                        name="name"
+                        required
+                        defaultValue={boat?.name}
+                        className="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300"
+                        placeholder="e.g. The Pearl"
+                    />
                     {state?.errors?.name && <p className="text-red-500 text-xs mt-1">{state.errors.name[0]}</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-1">Capacity</label>
-                    <input type="number" name="capacity" min={1} required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900" />
+                    <label className="block text-sm font-bold text-gray-800 mb-1">Capacity</label>
+                    <input
+                        type="number"
+                        name="capacity"
+                        min={1}
+                        required
+                        defaultValue={boat?.capacity}
+                        className="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300"
+                    />
                     {state?.errors?.capacity && <p className="text-red-500 text-xs mt-1">{state.errors.capacity[0]}</p>}
                 </div>
 
-                <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-1">Status</label>
-                    <select name="status" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </div>
+
             </div>
 
             <div className="pt-6 border-t border-gray-100 flex justify-end gap-3">
@@ -54,7 +74,7 @@ export default function BoatForm() {
                     type="submit"
                     className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-md"
                 >
-                    Create Boat
+                    {boat ? "Update Boat" : "Create Boat"}
                 </button>
             </div>
         </form>
