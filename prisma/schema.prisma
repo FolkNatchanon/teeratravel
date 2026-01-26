@@ -75,7 +75,6 @@ model Booking {
   session_id      Int?
   session         JoinSession?  @relation(fields: [session_id], references: [session_id])
 
-  @@unique([boat_id, trip_date, time_slot])
   @@index([user_id])
   @@index([package_id])
   @@index([boat_id])
