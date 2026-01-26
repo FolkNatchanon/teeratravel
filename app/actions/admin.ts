@@ -52,21 +52,23 @@ export async function createPackage(prevState: any, formData: FormData) {
     }
 
     try {
-        await prisma.package.create({
+        const pkg = await prisma.package.create({
             data: validatedFields.data
         });
+        revalidatePath("/admin/packages");
+        return { message: "Package created successfully", package: pkg };
     } catch (e) {
         console.error(e);
         return { message: "Failed to create package. Check if Boat ID exists." };
     }
-
-    revalidatePath("/admin/packages");
-    return { message: "Package created successfully" };
 }
 
 export async function createPackageAction(prevState: any, formData: FormData) {
     const result = await createPackage(prevState, formData);
-    if (result?.message === "Package created successfully") {
+    if (result?.message === "Package created successfully" && result.package) {
+        if (result.package.type === 'join') {
+            redirect(`/admin/packages/${result.package.package_id}/sessions`);
+        }
         redirect("/admin/packages");
     }
     return result;

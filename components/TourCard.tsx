@@ -31,7 +31,9 @@ export default function TourCard({ id, title, price, baseMemberCount, maxPeople,
                     <h3 className="text-xl font-bold text-gray-900">{title}</h3>
                     <div className="text-right">
                         <span className="block text-xl font-bold text-blue-600">{price.toLocaleString()}฿</span>
-                        <span className="text-sm text-gray-600 font-medium">/ {baseMemberCount}คน</span>
+                        <span className="text-sm text-gray-600 font-medium">
+                            {baseMemberCount > 1 ? `/ ${baseMemberCount}คน` : '/ ท่าน'}
+                        </span>
                     </div>
                 </div>
 
