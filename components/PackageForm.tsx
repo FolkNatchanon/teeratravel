@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createPackageAction, updatePackageAction } from "@/app/actions/admin";
 import Link from "next/link";
 
@@ -42,16 +42,16 @@ export default function PackageForm({ boats, packageData }: PackageFormProps) {
     // @ts-ignore
     const [state, formAction] = useActionState(action, initialState);
 
+    // State for toggling form fields
+    const [type, setType] = useState<"private" | "join">(packageData?.type || "private");
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const url = e.target.value;
-        // Check for Google Drive "open" or "file/d/" links
-        // Convert https://drive.google.com/file/d/ID/view -> https://lh3.googleusercontent.com/d/ID
         const driveRegex = /drive\.google\.com\/file\/d\/([-_\w]+)/;
         const match = url.match(driveRegex);
 
         if (match && match[1]) {
             const fileId = match[1];
-            // lh3.googleusercontent.com/d/ID is a reliable way to get a direct image link
             e.target.value = `https://lh3.googleusercontent.com/d/${fileId}`;
         }
     };
@@ -97,7 +97,6 @@ export default function PackageForm({ boats, packageData }: PackageFormProps) {
                                 className="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300"
                                 placeholder="Paste URL here (e.g. https://drive.google.com/...)"
                             />
-                            <p className="text-xs text-gray-600">Paste a Google Drive link, and it will be transparently converted to a direct link.</p>
                         </div>
                     </div>
                 </div>
@@ -113,9 +112,14 @@ export default function PackageForm({ boats, packageData }: PackageFormProps) {
 
                     <div>
                         <label className="block text-sm font-bold text-gray-800 mb-1">Type</label>
-                        <select name="type" defaultValue={packageData?.type || "private"} className="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 bg-white">
-                            <option value="private">Private</option>
-                            <option value="join">Join</option>
+                        <select
+                            name="type"
+                            value={type}
+                            onChange={(e) => setType(e.target.value as "private" | "join")}
+                            className="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 bg-white"
+                        >
+                            <option value="private">Private (เหมาลำ)</option>
+                            <option value="join">Join (จอยกรุ๊ป)</option>
                         </select>
                     </div>
 
@@ -147,30 +151,47 @@ export default function PackageForm({ boats, packageData }: PackageFormProps) {
                             </select>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-800 mb-1">Base Price (THB)</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700">฿</span>
-                                <input type="number" name="base_price" min={0} defaultValue={Number(packageData?.base_price) || ""} required className="w-full pl-8 pr-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300" placeholder="6900" />
-                            </div>
-                        </div>
+                        {type === 'private' ? (
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-800 mb-1">Base Price (THB) / ราคาเหมา</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700">฿</span>
+                                        <input type="number" name="base_price" min={0} defaultValue={Number(packageData?.base_price) || ""} required className="w-full pl-8 pr-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300" placeholder="6900" />
+                                    </div>
+                                </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-800 mb-1">For (Members)</label>
-                            <div className="flex items-center gap-2">
-                                <input type="number" name="base_member_count" defaultValue={packageData?.base_member_count || 10} min={1} required className="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300" />
-                                <span className="text-gray-500 whitespace-nowrap">Persons</span>
-                            </div>
-                        </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-800 mb-1">For (Members) / สำหรับ (ท่าน)</label>
+                                    <div className="flex items-center gap-2">
+                                        <input type="number" name="base_member_count" defaultValue={packageData?.base_member_count || 10} min={1} required className="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300" />
+                                        <span className="text-gray-500 whitespace-nowrap">Persons</span>
+                                    </div>
+                                </div>
 
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-800 mb-1">Extra Price Per Person (THB)</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">+฿</span>
-                                <input type="number" name="extra_price_per_person" min={0} defaultValue={Number(packageData?.extra_price_per_person) || ""} required className="w-full pl-10 pr-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300" placeholder="450" />
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">Applied when passenger count exceeds base members.</p>
-                        </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-800 mb-1">Extra Price Per Person (THB) / ราคาเพิ่มต่อท่าน</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">+฿</span>
+                                        <input type="number" name="extra_price_per_person" min={0} defaultValue={Number(packageData?.extra_price_per_person) || ""} required className="w-full pl-10 pr-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300" placeholder="450" />
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-800 mb-1">Price Per Person (THB) / ราคาต่อท่าน</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700">฿</span>
+                                        <input type="number" name="base_price" min={0} defaultValue={Number(packageData?.base_price) || ""} required className="w-full pl-8 pr-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300" placeholder="1200" />
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">This will be the default price per person for new sessions.</p>
+                                </div>
+                                <input type="hidden" name="base_member_count" value="1" />
+                                <input type="hidden" name="extra_price_per_person" value="0" />
+                            </>
+                        )}
+
                     </div>
                 </div>
             </div>

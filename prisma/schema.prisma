@@ -48,6 +48,7 @@ model Package {
   boat_id                Int
   bookings               Booking[]
   boat                   Boat        @relation(fields: [boat_id], references: [boat_id])
+  sessions               JoinSession[]
 
   @@index([boat_id])
   @@index([status])
@@ -71,6 +72,8 @@ model Booking {
   user            User          @relation(fields: [user_id], references: [user_id])
   passengers      Passenger[]
   staff           Staff[]
+  session_id      Int?
+  session         JoinSession?  @relation(fields: [session_id], references: [session_id])
 
   @@unique([boat_id, trip_date, time_slot])
   @@index([user_id])
@@ -78,6 +81,7 @@ model Booking {
   @@index([boat_id])
   @@index([trip_date])
   @@index([status])
+  @@index([session_id])
 }
 
 model Passenger {
@@ -132,4 +136,23 @@ model Staff {
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now()) @updatedAt
   bookings   Booking[]
+}
+
+model JoinSession {
+  session_id       Int           @id @default(autoincrement())
+  package_id       Int
+  trip_date        DateTime      @db.Date
+  time_slot        TimeSlot
+  max_capacity     Int
+  current_bookings Int           @default(0)
+  price_per_person Decimal?      @db.Decimal(10, 2)
+  status           Status        @default(active)
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @default(now()) @updatedAt
+  package          Package       @relation(fields: [package_id], references: [package_id])
+  bookings         Booking[]
+
+  @@index([package_id])
+  @@index([trip_date])
+  @@unique([package_id, trip_date, time_slot])
 }

@@ -13,6 +13,7 @@ const BookingSchema = z.object({
     }),
     timeSlot: z.enum(["morning", "afternoon"]),
     passengerCount: z.coerce.number().min(1, "จำนวนผู้โดยสารต้องอย่างน้อย 1 คน"),
+    joinSessionId: z.coerce.number().optional(),
 });
 
 export async function createBooking(prevState: any, formData: FormData) {
@@ -27,6 +28,7 @@ export async function createBooking(prevState: any, formData: FormData) {
         tripDate: formData.get("tripDate"),
         timeSlot: formData.get("timeSlot"),
         passengerCount: formData.get("passengerCount"),
+        joinSessionId: formData.get("joinSessionId"),
     });
 
     if (!validatedFields.success) {
@@ -36,10 +38,9 @@ export async function createBooking(prevState: any, formData: FormData) {
         };
     }
 
-    const { packageId, tripDate, timeSlot, passengerCount } = validatedFields.data;
+    const { packageId, tripDate, timeSlot, passengerCount, joinSessionId } = validatedFields.data;
 
     try {
-        // Check if package exists and get boat info
         const pkg = await prisma.package.findUnique({
             where: { package_id: packageId },
             include: { boat: true },
@@ -49,56 +50,83 @@ export async function createBooking(prevState: any, formData: FormData) {
             return { message: "ไม่พบแพ็คเกจที่เลือก" };
         }
 
-        // Calculate total price
-        // Base price is per package cost (up to base_member_count)
-        // Extra price per person if exceeding base_member_count
-        let totalPrice = Number(pkg.base_price);
-        if (passengerCount > pkg.base_member_count) {
-            const extraPeople = passengerCount - pkg.base_member_count;
-            totalPrice += extraPeople * Number(pkg.extra_price_per_person);
-        }
+        let totalPrice = 0;
+        let finalTripDate = new Date(tripDate);
+        let finalTimeSlot = timeSlot;
 
-        // Check if passenger count exceeds boat capacity
-        if (passengerCount > pkg.boat.capacity) {
-            return {
-                message: `จำนวนผู้โดยสารเกินความจุของเรือ (สูงสุด ${pkg.boat.capacity} ท่าน)`,
-                errors: { passengerCount: [`เรือลำนี้รองรับได้สูงสุด ${pkg.boat.capacity} ท่าน`] }
-            };
-        }
+        // JOIN SESSION LOGIC
+        if (joinSessionId) {
+            const joinSession = await prisma.joinSession.findUnique({
+                where: { session_id: joinSessionId },
+            });
 
-        // Check availability (optional but recommended)
-        // For now, assuming if boat is active, we can book. 
-        // Ideally we should check if boat is already booked for that date/slot.
-        // Schema has @@unique([boat_id, trip_date, time_slot]) in Booking model.
-        // So we should handle the unique constraint violation.
-
-        const existingBooking = await prisma.booking.findFirst({
-            where: {
-                boat_id: pkg.boat_id,
-                trip_date: new Date(tripDate),
-                time_slot: timeSlot as any, // Cast to match enum
-                status: { not: 'cancel' } // If cancelled, maybe slot is free? 
-                // Actually unique index handles it on DB level regardless of status usually, 
-                // but status 'cancel' might effectively free it up logically.
-                // However, the DB unique constraint doesn't care about 'status'.
-                // If a cancelled booking exists, it still blocks the unique slot?
-                // Let's assume we proceed and catch error if duplicate.
+            if (!joinSession) {
+                return { message: "ไม่พบรอบการจองที่เลือก" };
             }
-        });
 
-        if (existingBooking) {
-            // If existing booking is cancelled, maybe we can delete it or ignore it?
-            // But for now, let's just say "Full" if match found.
-            if (existingBooking.status !== 'cancel') {
+            if (joinSession.status !== 'active') {
+                return { message: "รอบการจองนี้ปิดแล้ว" };
+            }
+
+            if (joinSession.current_bookings + passengerCount > joinSession.max_capacity) {
+                return { message: `ที่นั่งไม่พอ (เหลือ ${joinSession.max_capacity - joinSession.current_bookings} ที่นั่ง)` };
+            }
+
+            // Override date/time with session's date/time
+            finalTripDate = new Date(joinSession.trip_date);
+            finalTimeSlot = joinSession.time_slot;
+
+            // Calculate price (use session price override if available, else package base price per person?)
+            // Usually Join trips have a per-person price. 
+            // Let's assume package.base_price is per person for 'join' type, or use session.price_per_person.
+            const pricePerHead = joinSession.price_per_person
+                ? Number(joinSession.price_per_person)
+                : Number(pkg.base_price); // Fallback
+
+            totalPrice = pricePerHead * passengerCount;
+
+        } else {
+            // PRIVATE TRIP LOGIC (Existing)
+            if (pkg.type === 'join') {
+                return { message: "แพ็คเกจนี้ต้องเลือกจองตามรอบตารางเวลาเท่านั้น" };
+            }
+
+            totalPrice = Number(pkg.base_price);
+            if (passengerCount > pkg.base_member_count) {
+                const extraPeople = passengerCount - pkg.base_member_count;
+                totalPrice += extraPeople * Number(pkg.extra_price_per_person);
+            }
+
+            // Check boat capacity
+            if (passengerCount > pkg.boat.capacity) {
+                return {
+                    message: `จำนวนผู้โดยสารเกินความจุของเรือ (สูงสุด ${pkg.boat.capacity} ท่าน)`,
+                    errors: { passengerCount: [`เรือลำนี้รองรับได้สูงสุด ${pkg.boat.capacity} ท่าน`] }
+                };
+            }
+
+            // Check availability (Private)
+            const existingBooking = await prisma.booking.findFirst({
+                where: {
+                    boat_id: pkg.boat_id,
+                    trip_date: finalTripDate,
+                    time_slot: finalTimeSlot as any,
+                    status: { not: 'cancel' }
+                }
+            });
+
+            if (existingBooking) {
                 return { message: "เรือไม่ว่างในช่วงเวลาที่เลือก" };
             }
-            // If it was cancelled, ideally we should be able to re-book. 
-            // But the unique constraint might block us. 
-            // We'll leave this complexity for now and just try to create.
         }
 
         // Parse passengers
-        const passengers = [];
+        const passengers: {
+            fname: string;
+            lname: string;
+            age: number;
+            gender: "male" | "female" | "other";
+        }[] = [];
         for (let i = 0; i < passengerCount; i++) {
             passengers.push({
                 fname: formData.get(`passenger_fname_${i}`) as string,
@@ -108,31 +136,46 @@ export async function createBooking(prevState: any, formData: FormData) {
             });
         }
 
-        await prisma.booking.create({
-            data: {
-                user_id: session.userId,
-                package_id: packageId,
-                boat_id: pkg.boat_id,
-                trip_date: new Date(tripDate),
-                time_slot: timeSlot as any,
-                passenger_count: passengerCount,
-                total_price: totalPrice,
-                status: "pending",
-                passengers: {
-                    create: passengers
-                }
-            },
+        // Transaction for Join Session booking to ensure atomicity
+        await prisma.$transaction(async (tx) => {
+            // Create booking
+            await tx.booking.create({
+                data: {
+                    user_id: session.userId,
+                    package_id: packageId,
+                    boat_id: pkg.boat_id,
+                    trip_date: finalTripDate,
+                    time_slot: finalTimeSlot as any,
+                    passenger_count: passengerCount,
+                    total_price: totalPrice,
+                    status: "pending", // Default to pending payment
+                    session_id: joinSessionId || null,
+                    passengers: {
+                        create: passengers
+                    }
+                },
+            });
+
+            // Update session count if join
+            if (joinSessionId) {
+                await tx.joinSession.update({
+                    where: { session_id: joinSessionId },
+                    data: {
+                        current_bookings: { increment: passengerCount }
+                    }
+                });
+            }
         });
 
     } catch (error: any) {
         console.error("Booking error:", error);
-        if (error.code === 'P2002') { // Prisma unique constraint violation
+        if (error.code === 'P2002') {
             return { message: "เรือไม่ว่างในช่วงเวลาที่เลือก (มีการจองแล้ว)" };
         }
         return { message: "เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง" };
     }
 
-    revalidatePath("/booking-history"); // Revalidate user's booking history
+    revalidatePath("/booking-history");
     redirect("/booking-history?success=true");
 }
 

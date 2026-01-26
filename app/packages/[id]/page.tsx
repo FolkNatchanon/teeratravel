@@ -3,11 +3,10 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Clock, Users, Anchor, MapPin, CheckCircle } from "lucide-react";
 import BookingForm from "@/components/BookingForm";
-
+import JoinBookingForm from "@/components/JoinBookingForm";
 import { getSession } from "@/lib/session";
 
 export default async function PackageDetailPage({ params }: { params: { id: string } }) {
-    // Await params in case it's a promise (Next.js 15+ change, safe to await)
     const resolvedParams = await params;
     const packageId = Number(resolvedParams.id);
 
@@ -19,7 +18,16 @@ export default async function PackageDetailPage({ params }: { params: { id: stri
 
     const pkg = await prisma.package.findUnique({
         where: { package_id: packageId },
-        include: { boat: true },
+        include: {
+            boat: true,
+            sessions: {
+                where: {
+                    status: 'active',
+                    trip_date: { gte: new Date() }
+                },
+                orderBy: { trip_date: 'asc' }
+            }
+        },
     });
 
     if (!pkg) {
@@ -92,18 +100,28 @@ export default async function PackageDetailPage({ params }: { params: { id: stri
                             <span className="text-gray-500 text-sm">ราคาเริ่มต้น</span>
                             <div className="flex items-baseline gap-2">
                                 <span className="text-3xl font-bold text-blue-600">฿{Number(pkg.base_price).toLocaleString()}</span>
-                                <span className="text-gray-400">/ ทริป</span>
+                                <span className="text-gray-400">
+                                    {pkg.type === 'join' ? '/ ท่าน' : '/ ทริป'}
+                                </span>
                             </div>
                         </div>
 
-                        <BookingForm
-                            packageId={pkg.package_id}
-                            baseMemberCount={pkg.base_member_count}
-                            extraPricePerPerson={Number(pkg.extra_price_per_person)}
-                            maxCapacity={pkg.boat.capacity}
-                            basePrice={Number(pkg.base_price)}
-                            isLoggedIn={!!session}
-                        />
+                        {pkg.type === 'join' ? (
+                            <JoinBookingForm
+                                packageId={pkg.package_id}
+                                sessions={pkg.sessions}
+                                isLoggedIn={!!session}
+                            />
+                        ) : (
+                            <BookingForm
+                                packageId={pkg.package_id}
+                                baseMemberCount={pkg.base_member_count}
+                                extraPricePerPerson={Number(pkg.extra_price_per_person)}
+                                maxCapacity={pkg.boat.capacity}
+                                basePrice={Number(pkg.base_price)}
+                                isLoggedIn={!!session}
+                            />
+                        )}
 
                         <div className="mt-6 pt-6 border-t border-gray-100 space-y-3">
                             <div className="flex items-center gap-3 text-sm text-gray-600">
