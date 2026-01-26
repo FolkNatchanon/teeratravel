@@ -135,3 +135,16 @@ export async function createBooking(prevState: any, formData: FormData) {
     revalidatePath("/booking-history"); // Revalidate user's booking history
     redirect("/booking-history?success=true");
 }
+
+export async function assignStaffToBooking(bookingId: number, staffIds: number[]) {
+    await prisma.booking.update({
+        where: { booking_id: bookingId },
+        data: {
+            staff: {
+                set: staffIds.map((id) => ({ staff_id: id })),
+            },
+        },
+    });
+
+    revalidatePath(`/admin/bookings/${bookingId}`);
+}

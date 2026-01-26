@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Calendar, Clock, Users, Anchor, ArrowLeft, User, Phone, Mail, FileText } from "lucide-react";
 import BookingStatusDropdown from "@/components/BookingStatusDropdown";
 
+import AssignStaffForm from "@/components/AssignStaffForm";
+
 // Helper to validate image URL
 function getValidImageUrl(url: string | null) {
     if (!url) return "/placeholder.png";
@@ -31,17 +33,23 @@ export default async function AdminBookingDetailPage({ params }: { params: { id:
         notFound();
     }
 
-    const booking = await prisma.booking.findUnique({
-        where: { booking_id: bookingId },
-        include: {
-            package: {
-                include: { boat: true }
-            },
-            passengers: true,
-            boat: true,
-            user: true
-        }
-    });
+    const [booking, allStaff] = await Promise.all([
+        prisma.booking.findUnique({
+            where: { booking_id: bookingId },
+            include: {
+                package: {
+                    include: { boat: true }
+                },
+                passengers: true,
+                boat: true,
+                user: true,
+                staff: true,
+            }
+        }),
+        prisma.staff.findMany({
+            orderBy: { fname: 'asc' }
+        })
+    ]);
 
     if (!booking) {
         notFound();
@@ -120,7 +128,7 @@ export default async function AdminBookingDetailPage({ params }: { params: { id:
                                     <span className="text-xs text-gray-500 font-medium">ช่วงเวลา</span>
                                     <div className="flex items-center gap-2 text-sm text-gray-900 font-medium">
                                         <Clock className="w-4 h-4 text-blue-600" />
-                                        {timeSlotText[booking.time_slot]}
+                                        {timeSlotText[booking.time_slot as keyof typeof timeSlotText]}
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1">
@@ -151,7 +159,7 @@ export default async function AdminBookingDetailPage({ params }: { params: { id:
                             <span className="text-sm text-gray-500">ทั้งหมด {booking.passengers.length} ท่าน</span>
                         </div>
                         <div className="divide-y divide-gray-100">
-                            {booking.passengers.map((passenger, index) => (
+                            {booking.passengers.map((passenger: any, index: number) => (
                                 <div key={passenger.passenger_id} className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors">
                                     <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">
                                         {index + 1}
@@ -159,7 +167,7 @@ export default async function AdminBookingDetailPage({ params }: { params: { id:
                                     <div className="flex-1">
                                         <p className="font-medium text-gray-900">{passenger.fname} {passenger.lname}</p>
                                         <p className="text-xs text-gray-500">
-                                            อายุ {passenger.age} ปี • {genderText[passenger.gender]}
+                                            อายุ {passenger.age} ปี • {genderText[passenger.gender as keyof typeof genderText]}
                                         </p>
                                     </div>
                                 </div>
@@ -176,8 +184,8 @@ export default async function AdminBookingDetailPage({ params }: { params: { id:
                         <div className="space-y-4">
                             <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
                                 <span className="text-sm text-gray-500">สถานะปัจจุบัน</span>
-                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusColors[booking.status]}`}>
-                                    {statusText[booking.status]}
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusColors[booking.status as keyof typeof statusColors]}`}>
+                                    {statusText[booking.status as keyof typeof statusText]}
                                 </span>
                             </div>
                             <div>
@@ -189,6 +197,13 @@ export default async function AdminBookingDetailPage({ params }: { params: { id:
                             </div>
                         </div>
                     </div>
+
+                    {/* Staff Assignment Card */}
+                    <AssignStaffForm
+                        bookingId={booking.booking_id}
+                        allStaff={allStaff}
+                        initialAssignedStaff={booking.staff}
+                    />
 
                     {/* Customer Info Card */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

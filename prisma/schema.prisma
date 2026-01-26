@@ -70,6 +70,7 @@ model Booking {
   package         Package       @relation(fields: [package_id], references: [package_id])
   user            User          @relation(fields: [user_id], references: [user_id])
   passengers      Passenger[]
+  staff           Staff[]
 
   @@unique([boat_id, trip_date, time_slot])
   @@index([user_id])
@@ -116,4 +117,19 @@ enum PackageType {
 enum TimeSlot {
   morning
   afternoon
+}
+
+enum StaffRole {
+  captain
+  staff
+}
+
+model Staff {
+  staff_id   Int       @id @default(autoincrement())
+  fname      String    @db.VarChar(60)
+  lname      String    @db.VarChar(60)
+  role       StaffRole
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  bookings   Booking[]
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Package, Calendar, Anchor, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Calendar, Anchor, LogOut, Users } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 
 export default function AdminSidebar() {
@@ -8,6 +8,7 @@ export default function AdminSidebar() {
         { name: "Packages", href: "/admin/packages", icon: Package },
         { name: "Bookings", href: "/admin/bookings", icon: Calendar },
         { name: "Boats", href: "/admin/boats", icon: Anchor },
+        { name: "Staff", href: "/admin/staff", icon: Users },
     ];
 
     return (
