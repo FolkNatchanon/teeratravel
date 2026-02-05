@@ -40,6 +40,7 @@ model Package {
   short_intro            String      @db.VarChar(255)
   description            String      @db.Text
   duration_hours         Decimal     @db.Decimal(5, 2)
+  keywords               String      @default("") @db.VarChar(255)
   type                   PackageType @default(private)
   status                 Status      @default(active)
   base_member_count      Int         @default(10)
@@ -104,6 +105,7 @@ enum BookingStatus {
   pending
   complete
   cancel
+  finished
 }
 
 enum Gender {
@@ -127,6 +129,13 @@ enum StaffRole {
   staff
 }
 
+enum SessionStatus {
+  active
+  closed
+  finished
+  cancelled
+}
+
 model Staff {
   staff_id   Int       @id @default(autoincrement())
   fname      String    @db.VarChar(60)
@@ -135,6 +144,7 @@ model Staff {
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now()) @updatedAt
   bookings   Booking[]
+  sessions   JoinSession[]
 }
 
 model JoinSession {
@@ -145,11 +155,12 @@ model JoinSession {
   max_capacity     Int
   current_bookings Int           @default(0)
   price_per_person Decimal?      @db.Decimal(10, 2)
-  status           Status        @default(active)
+  status           SessionStatus @default(active)
   created_at       DateTime      @default(now())
   updated_at       DateTime      @default(now()) @updatedAt
   package          Package       @relation(fields: [package_id], references: [package_id])
   bookings         Booking[]
+  staff            Staff[]
 
   @@index([package_id])
   @@index([trip_date])

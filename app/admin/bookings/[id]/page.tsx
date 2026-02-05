@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Calendar, Clock, Users, Anchor, ArrowLeft, User, Phone, Mail, FileText } from "lucide-react";
 import BookingStatusDropdown from "@/components/BookingStatusDropdown";
 
-import AssignStaffForm from "@/components/AssignStaffForm";
+
 
 // Helper to validate image URL
 function getValidImageUrl(url: string | null) {
@@ -59,12 +59,14 @@ export default async function AdminBookingDetailPage({ params }: { params: { id:
         pending: "bg-blue-100 text-blue-800",
         complete: "bg-green-100 text-green-800",
         cancel: "bg-red-100 text-red-800",
+        finished: "bg-gray-100 text-gray-600",
     };
 
     const statusText = {
         pending: "รอดำเนินการ",
         complete: "สำเร็จ",
         cancel: "ยกเลิก",
+        finished: "เสร็จสิ้น",
     };
 
     const timeSlotText = {
@@ -198,12 +200,45 @@ export default async function AdminBookingDetailPage({ params }: { params: { id:
                         </div>
                     </div>
 
-                    {/* Staff Assignment Card */}
-                    <AssignStaffForm
-                        bookingId={booking.booking_id}
-                        allStaff={allStaff}
-                        initialAssignedStaff={booking.staff}
-                    />
+                    {/* Staff Assignment Card (Read-Only) */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            พนักงานประจำเรือ
+                        </h2>
+                        {booking.staff.length > 0 ? (
+                            <div className="space-y-3">
+                                {booking.staff.filter(s => s.role === 'captain').map(captain => (
+                                    <div key={captain.staff_id} className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                                            C
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-900">{captain.fname} {captain.lname}</p>
+                                            <p className="text-xs text-gray-500">Captain</p>
+                                        </div>
+                                    </div>
+                                ))}
+                                {booking.staff.filter(s => s.role === 'staff').map(crew => (
+                                    <div key={crew.staff_id} className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs">
+                                            S
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-900">{crew.fname} {crew.lname}</p>
+                                            <p className="text-xs text-gray-500">Crew</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-sm text-gray-500 italic text-center py-4 bg-gray-50 rounded-lg">
+                                No staff assigned yet.
+                                <br />
+                                <span className="text-xs">Go to Schedule to assign.</span>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Customer Info Card */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

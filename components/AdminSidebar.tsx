@@ -6,7 +6,8 @@ export default function AdminSidebar() {
     const links = [
         { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
         { name: "Packages", href: "/admin/packages", icon: Package },
-        { name: "Bookings", href: "/admin/bookings", icon: Calendar },
+        { name: "Schedule", href: "/admin/schedule", icon: Calendar }, // Added Schedule link
+        { name: "Bookings", href: "/admin/bookings", icon: Calendar }, // Keeping Bookings as simple table
         { name: "Boats", href: "/admin/boats", icon: Anchor },
         { name: "Staff", href: "/admin/staff", icon: Users },
     ];

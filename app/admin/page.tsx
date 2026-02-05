@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Users, Calendar, Package, Anchor, TrendingUp, DollarSign } from "lucide-react";
+import { formatId } from "@/lib/utils";
 
 export default async function AdminDashboard() {
     const [
@@ -72,7 +73,7 @@ export default async function AdminDashboard() {
                         <tbody className="divide-y divide-gray-100">
                             {recentBookings.map((booking) => (
                                 <tr key={booking.booking_id} className="hover:bg-gray-50/50">
-                                    <td className="px-6 py-4 text-sm text-gray-900">#{booking.booking_id}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-900">{formatId(booking.booking_id, 'booking')}</td>
                                     <td className="px-6 py-4 text-sm">
                                         <div className="font-medium text-gray-900">{booking.user.user_fname} {booking.user.user_lname}</div>
                                         <div className="text-gray-500 text-xs">{booking.user.email}</div>

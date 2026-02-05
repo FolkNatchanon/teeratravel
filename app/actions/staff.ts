@@ -27,8 +27,26 @@ export async function createStaff(formData: FormData) {
 }
 
 export async function deleteStaff(id: number) {
-    await prisma.staff.delete({
-        where: { staff_id: id },
+    try {
+        await prisma.staff.delete({
+            where: { staff_id: id },
+        });
+        revalidatePath("/admin/staff");
+        return { message: "Staff deleted successfully" };
+    } catch (e) {
+        return { message: "Failed to delete staff. They might be assigned to a booking." };
+    }
+}
+
+export async function assignStaffToSession(sessionId: number, staffIds: number[]) {
+    await prisma.joinSession.update({
+        where: { session_id: sessionId },
+        data: {
+            staff: {
+                set: staffIds.map((id) => ({ staff_id: id })),
+            },
+        },
     });
-    revalidatePath("/admin/staff");
+
+    revalidatePath(`/admin/sessions/${sessionId}`);
 }

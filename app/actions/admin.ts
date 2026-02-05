@@ -25,6 +25,7 @@ const PackageSchema = z.object({
     base_member_count: z.coerce.number().min(1).default(1),
     base_price: z.coerce.number().min(0),
     extra_price_per_person: z.coerce.number().min(0).default(0),
+    keywords: z.string().optional(),
 });
 
 export async function createPackage(prevState: any, formData: FormData) {
@@ -42,6 +43,7 @@ export async function createPackage(prevState: any, formData: FormData) {
         base_member_count: formData.get("base_member_count"),
         base_price: formData.get("base_price"),
         extra_price_per_person: formData.get("extra_price_per_person"),
+        keywords: formData.get("keywords"),
     });
 
     if (!validatedFields.success) {
@@ -53,7 +55,10 @@ export async function createPackage(prevState: any, formData: FormData) {
 
     try {
         const pkg = await prisma.package.create({
-            data: validatedFields.data
+            data: {
+                ...validatedFields.data,
+                keywords: (validatedFields.data.keywords || "").split(",").filter(Boolean).join(","),
+            }
         });
         revalidatePath("/admin/packages");
         return { message: "Package created successfully", package: pkg };
@@ -91,6 +96,7 @@ export async function updatePackageAction(prevState: any, formData: FormData) {
         base_member_count: formData.get("base_member_count"),
         base_price: formData.get("base_price"),
         extra_price_per_person: formData.get("extra_price_per_person"),
+        keywords: formData.get("keywords"),
     });
 
     if (!validatedFields.success) {
@@ -103,7 +109,10 @@ export async function updatePackageAction(prevState: any, formData: FormData) {
     try {
         await prisma.package.update({
             where: { package_id: packageId },
-            data: validatedFields.data
+            data: {
+                ...validatedFields.data,
+                keywords: (validatedFields.data.keywords || "").split(",").filter(Boolean).join(","),
+            }
         });
     } catch (e) {
         console.error(e);
@@ -122,7 +131,7 @@ export async function updateBookingStatus(formData: FormData) {
 
     if (!bookingId || !status) return;
 
-    if (!['pending', 'complete', 'cancel'].includes(status)) return;
+    if (!['pending', 'complete', 'cancel', 'finished'].includes(status)) return;
 
     try {
         await prisma.booking.update({
@@ -134,6 +143,55 @@ export async function updateBookingStatus(formData: FormData) {
     }
 
     revalidatePath("/admin/bookings");
+}
+
+export async function updateSessionStatus(formData: FormData) {
+    await checkAdmin();
+    const sessionId = Number(formData.get("sessionId"));
+    const status = formData.get("status") as string;
+
+    if (!sessionId || !status) return;
+
+    if (!['active', 'closed', 'finished', 'cancelled'].includes(status)) return;
+
+    try {
+        await prisma.$transaction(async (tx) => {
+            // 1. Update Session status
+            await tx.joinSession.update({
+                where: { session_id: sessionId },
+                data: { status: status as any }
+            });
+
+            // 2. If finishing the session:
+            // - pending bookings = no-show, auto-cancel them
+            // - complete bookings = finished successfully
+            if (status === 'finished') {
+                // Cancel pending bookings (no-show)
+                await tx.booking.updateMany({
+                    where: {
+                        session_id: sessionId,
+                        status: 'pending'
+                    },
+                    data: { status: 'cancel' }
+                });
+
+                // Mark complete bookings as finished
+                await tx.booking.updateMany({
+                    where: {
+                        session_id: sessionId,
+                        status: 'complete'
+                    },
+                    data: { status: 'finished' }
+                });
+            }
+        });
+    } catch (e) {
+        console.error("Failed to update session status", e);
+    }
+
+    revalidatePath("/admin/schedule");
+    revalidatePath("/admin/sessions");
+    revalidatePath(`/admin/sessions/${sessionId}`);
 }
 
 const BoatSchema = z.object({

@@ -2,16 +2,18 @@
 
 import { useState, useTransition } from "react";
 import { assignStaffToBooking } from "@/app/actions/booking";
+import { assignStaffToSession } from "@/app/actions/staff";
 import { Staff } from "@prisma/client";
 import { Users, Loader2, Save } from "lucide-react";
 
 interface AssignStaffFormProps {
-    bookingId: number;
+    bookingId?: number;
+    sessionId?: number;
     allStaff: Staff[];
     initialAssignedStaff: Staff[];
 }
 
-export default function AssignStaffForm({ bookingId, allStaff, initialAssignedStaff }: AssignStaffFormProps) {
+export default function AssignStaffForm({ bookingId, sessionId, allStaff, initialAssignedStaff }: AssignStaffFormProps) {
     const [selectedCaptainId, setSelectedCaptainId] = useState<number | "">(
         initialAssignedStaff.find(s => s.role === 'captain')?.staff_id || ""
     );
@@ -32,7 +34,7 @@ export default function AssignStaffForm({ bookingId, allStaff, initialAssignedSt
     };
 
     const handleSave = () => {
-        if (!selectedCaptainId) return; // Captain is mandatory? Let's say yes for now or just optional
+        if (!selectedCaptainId) return;
 
         const staffIds = [
             Number(selectedCaptainId),
@@ -40,7 +42,11 @@ export default function AssignStaffForm({ bookingId, allStaff, initialAssignedSt
         ].filter(id => id > 0);
 
         startTransition(() => {
-            assignStaffToBooking(bookingId, staffIds);
+            if (sessionId) {
+                assignStaffToSession(sessionId, staffIds);
+            } else if (bookingId) {
+                assignStaffToBooking(bookingId, staffIds);
+            }
         });
     };
 
@@ -48,7 +54,7 @@ export default function AssignStaffForm({ bookingId, allStaff, initialAssignedSt
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                พนักงานประจำเรือ
+                {sessionId ? "Boat Staff (Session)" : "Boat Staff (Booking)"}
             </h2>
 
             <div className="space-y-4">

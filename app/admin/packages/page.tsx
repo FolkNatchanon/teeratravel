@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus, Pencil, Eye } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Filter, Eye } from "lucide-react";
 import Image from "next/image";
 import DeletePackageButton from "@/components/DeletePackageButton";
+import { formatId } from "@/lib/utils";
 
 // Helper to validate image URL
 function getValidImageUrl(url: string | null) {
@@ -51,7 +52,7 @@ export default async function AdminPackagesPage() {
                         <div className="flex-1 flex flex-col justify-between">
                             <div>
                                 <div className="flex justify-between items-start">
-                                    <h3 className="text-xl font-bold text-gray-900">{pkg.name}</h3>
+                                    <td className="px-6 py-4 text-gray-900 font-medium">{formatId(pkg.package_id, 'package')}</td>
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                         ${pkg.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                                         {pkg.status}

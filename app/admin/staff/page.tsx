@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { deleteStaff } from "@/app/actions/staff";
 import Link from "next/link";
-import { Plus, Trash2, User, UserCheck } from "lucide-react";
+import { Plus, Trash2, User, UserCheck, Pencil } from "lucide-react";
+import DeleteStaffButton from "@/components/DeleteStaffButton";
+import { formatId } from "@/lib/utils";
 
 export default async function AdminStaffPage() {
     const staffs = await prisma.staff.findMany({
@@ -31,6 +33,7 @@ export default async function AdminStaffPage() {
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 text-gray-500 text-sm">
                             <tr>
+                                <th className="px-6 py-4 font-medium">ID</th>
                                 <th className="px-6 py-4 font-medium">Name</th>
                                 <th className="px-6 py-4 font-medium">Role</th>
                                 <th className="px-6 py-4 font-medium">Active Bookings</th>
@@ -40,6 +43,7 @@ export default async function AdminStaffPage() {
                         <tbody className="divide-y divide-gray-100">
                             {staffs.map((staff) => (
                                 <tr key={staff.staff_id} className="hover:bg-gray-50/50">
+                                    <td className="px-6 py-4 text-gray-900">{formatId(staff.staff_id, 'staff')}</td>
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-gray-900">{staff.fname} {staff.lname}</div>
                                     </td>
@@ -56,16 +60,14 @@ export default async function AdminStaffPage() {
                                     <td className="px-6 py-4 text-sm text-gray-500">
                                         {staff.bookings.length}
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <form action={deleteStaff.bind(null, staff.staff_id)}>
-                                            <button
-                                                type="submit"
-                                                className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors"
-                                                title="Delete Staff"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </form>
+                                    <td className="px-6 py-4 text-right space-x-2">
+                                        <Link
+                                            href={`/admin/staff/${staff.staff_id}/edit`}
+                                            className="inline-flex p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </Link>
+                                        <DeleteStaffButton staffId={staff.staff_id} />
                                     </td>
                                 </tr>
                             ))}

@@ -1,6 +1,8 @@
 
 import { prisma } from "@/lib/prisma";
 import BookingStatusDropdown from "@/components/BookingStatusDropdown";
+import { formatId } from "@/lib/utils";
+import EndTripButton from "@/components/EndTripButton";
 
 export default async function AdminBookingsPage() {
     const bookings = await prisma.booking.findMany({
@@ -35,7 +37,7 @@ export default async function AdminBookingsPage() {
                         <tbody className="divide-y divide-gray-100">
                             {bookings.map((booking) => (
                                 <tr key={booking.booking_id} className="hover:bg-gray-50/50">
-                                    <td className="px-6 py-4 text-sm text-gray-900">#{booking.booking_id}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-900">{formatId(booking.booking_id, 'booking')}</td>
                                     <td className="px-6 py-4 text-sm">
                                         <div className="font-medium text-gray-900">{booking.user.user_fname} {booking.user.user_lname}</div>
                                         <div className="text-gray-500 text-xs">{booking.user.email}</div>
@@ -52,11 +54,12 @@ export default async function AdminBookingsPage() {
                                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                                         ฿{Number(booking.total_price).toLocaleString()}
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 flex items-center gap-2">
                                         <BookingStatusDropdown
                                             bookingId={booking.booking_id}
                                             currentStatus={booking.status}
                                         />
+                                        <EndTripButton bookingId={booking.booking_id} status={booking.status} />
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <a

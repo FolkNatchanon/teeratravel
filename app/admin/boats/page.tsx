@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Plus, Pencil, Anchor } from "lucide-react";
 import DeleteBoatButton from "@/components/DeleteBoatButton";
+import { formatId } from "@/lib/utils";
 
 export default async function AdminBoatsPage() {
     const boats = await prisma.boat.findMany({
@@ -37,7 +38,7 @@ export default async function AdminBoatsPage() {
                         <tbody className="divide-y divide-gray-100">
                             {boats.map((boat) => (
                                 <tr key={boat.boat_id} className="hover:bg-gray-50/50">
-                                    <td className="px-6 py-4 text-sm text-gray-900">#{boat.boat_id}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-900">{formatId(boat.boat_id, 'boat')}</td>
                                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                                         <div className="flex items-center gap-2">
                                             <Anchor className="w-4 h-4 text-gray-400" />

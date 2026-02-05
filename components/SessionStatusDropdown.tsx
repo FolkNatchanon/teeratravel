@@ -1,21 +1,21 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateBookingStatus } from "@/app/actions/admin";
+import { updateSessionStatus } from "@/app/actions/admin";
 
-interface BookingStatusDropdownProps {
-    bookingId: number;
-    currentStatus: "pending" | "complete" | "cancel" | "finished";
+interface SessionStatusDropdownProps {
+    sessionId: number;
+    currentStatus: "active" | "closed" | "finished" | "cancelled";
 }
 
 const statusOptions = [
-    { value: "pending", label: "รอชำระเงิน", color: "bg-yellow-100 text-yellow-800" },
-    { value: "complete", label: "ยืนยันการจอง", color: "bg-green-100 text-green-800" },
-    { value: "cancel", label: "ยกเลิก", color: "bg-red-100 text-red-800" },
+    { value: "active", label: "เปิดรับจอง", color: "bg-green-100 text-green-800" },
+    { value: "closed", label: "ปิดรับจอง", color: "bg-yellow-100 text-yellow-800" },
     { value: "finished", label: "เสร็จสิ้น", color: "bg-gray-100 text-gray-600" },
+    { value: "cancelled", label: "ยกเลิก", color: "bg-red-100 text-red-800" },
 ];
 
-export default function BookingStatusDropdown({ bookingId, currentStatus }: BookingStatusDropdownProps) {
+export default function SessionStatusDropdown({ sessionId, currentStatus }: SessionStatusDropdownProps) {
     const [selectedStatus, setSelectedStatus] = useState(currentStatus);
     const [showConfirm, setShowConfirm] = useState(false);
     const [pendingStatus, setPendingStatus] = useState<string | null>(null);
@@ -33,11 +33,11 @@ export default function BookingStatusDropdown({ bookingId, currentStatus }: Book
         if (!pendingStatus) return;
 
         const formData = new FormData();
-        formData.append("bookingId", bookingId.toString());
+        formData.append("sessionId", sessionId.toString());
         formData.append("status", pendingStatus);
 
         startTransition(async () => {
-            await updateBookingStatus(formData);
+            await updateSessionStatus(formData);
             setSelectedStatus(pendingStatus as any);
             setShowConfirm(false);
             setPendingStatus(null);
@@ -54,6 +54,10 @@ export default function BookingStatusDropdown({ bookingId, currentStatus }: Book
         return statusOptions.find(s => s.value === status)?.label || status;
     };
 
+    const getStatusColor = (status: string) => {
+        return statusOptions.find(s => s.value === status)?.color || "bg-gray-100 text-gray-800";
+    };
+
     return (
         <>
             <select
@@ -61,10 +65,7 @@ export default function BookingStatusDropdown({ bookingId, currentStatus }: Book
                 onChange={handleChange}
                 disabled={isPending}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium border-0 cursor-pointer focus:ring-2 focus:ring-blue-500 transition-colors
-                    ${selectedStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        selectedStatus === 'complete' ? 'bg-green-100 text-green-800' :
-                            selectedStatus === 'finished' ? 'bg-blue-100 text-blue-800' :
-                                'bg-red-100 text-red-800'}
+                    ${getStatusColor(selectedStatus)}
                     ${isPending ? 'opacity-50 cursor-wait' : ''}`}
             >
                 {statusOptions.map((option) => (
@@ -86,15 +87,21 @@ export default function BookingStatusDropdown({ bookingId, currentStatus }: Book
                     {/* Modal */}
                     <div className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
                         <h3 className="text-lg font-bold text-gray-900 mb-2">
-                            ยืนยันการเปลี่ยนสถานะ
+                            ยืนยันการเปลี่ยนสถานะ Session
                         </h3>
-                        <p className="text-gray-600 mb-6">
-                            คุณต้องการเปลี่ยนสถานะการจอง #{bookingId} จาก{" "}
+                        <p className="text-gray-600 mb-4">
+                            คุณต้องการเปลี่ยนสถานะ Session #{sessionId} จาก{" "}
                             <span className="font-semibold">{getStatusLabel(currentStatus)}</span>
                             {" "}เป็น{" "}
                             <span className="font-semibold">{getStatusLabel(pendingStatus || "")}</span>
                             {" "}ใช่หรือไม่?
                         </p>
+
+                        {pendingStatus === 'finished' && (
+                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                                <strong>หมายเหตุ:</strong> การจบ Session จะอัพเดต Booking ทั้งหมดใน Session นี้เป็น "เสร็จสิ้น" ด้วยโดยอัตโนมัติ
+                            </div>
+                        )}
 
                         <div className="flex gap-3 justify-end">
                             <button

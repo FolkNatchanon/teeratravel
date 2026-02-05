@@ -39,19 +39,11 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
-              href="/packages"
+              href="/recommendation"
               className="group inline-flex items-center gap-3 bg-cyan-500 hover:bg-cyan-400 text-white px-8 py-4 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-xl hover:shadow-cyan-500/30"
             >
-              ดูแพ็คเกจทัวร์
+              แนะนำแพ็คเกจ
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-
-            <Link
-              href="/contact"
-              className="group inline-flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/50 px-8 py-4 rounded-full font-bold text-lg transition-all hover:border-white"
-            >
-              ติดต่อเรา
-              <ArrowUpRight className="w-5 h-5 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </div>

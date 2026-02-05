@@ -1,27 +1,27 @@
-
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
 async function main() {
-    const email = 'admin@teeratravel.com'
-    const password = 'password123' // Plain text as requested
+    console.log('Start seeding ...')
 
-    const user = await prisma.user.upsert({
-        where: { email },
-        update: { role: 'A' },
+    // Create Admin User
+    const admin = await prisma.user.upsert({
+        where: { email: 'admin@demo.com' },
+        update: {},
         create: {
             username: 'admin',
             user_fname: 'Admin',
-            user_lname: 'User',
-            email,
-            password,
-            phone_number: '0812345678',
+            user_lname: 'Teera',
+            email: 'admin@demo.com',
+            phone_number: '-',
             role: 'A',
+            password: 'admin1234',
         },
     })
+    console.log('Created admin:', admin.email)
 
-    console.log('Admin user created/updated:', user)
+    console.log('Seeding finished.')
 }
 
 main()
