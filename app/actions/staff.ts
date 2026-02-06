@@ -39,6 +39,57 @@ export async function deleteStaff(id: number) {
 }
 
 export async function assignStaffToSession(sessionId: number, staffIds: number[]) {
+    // 1. Get Session Details
+    const session = await prisma.joinSession.findUnique({
+        where: { session_id: sessionId },
+        select: { trip_date: true, time_slot: true }
+    });
+
+    if (!session) {
+        throw new Error("Session not found");
+    }
+
+    // 2. Check for conflicts
+    const conflictingBooking = await prisma.booking.findFirst({
+        where: {
+            trip_date: session.trip_date,
+            time_slot: session.time_slot,
+            status: { not: "cancel" },
+            staff: {
+                some: {
+                    staff_id: { in: staffIds }
+                }
+            }
+        },
+        include: { staff: true }
+    });
+
+    if (conflictingBooking) {
+        const conflictingStaff = conflictingBooking.staff.find(s => staffIds.includes(s.staff_id));
+        return { success: false, message: `Staff ${conflictingStaff?.fname} is already assigned to Booking #${conflictingBooking.booking_id} at this time.` };
+    }
+
+    const conflictingSession = await prisma.joinSession.findFirst({
+        where: {
+            session_id: { not: sessionId },
+            trip_date: session.trip_date,
+            time_slot: session.time_slot,
+            status: { not: "cancelled" },
+            staff: {
+                some: {
+                    staff_id: { in: staffIds }
+                }
+            }
+        },
+        include: { staff: true }
+    });
+
+    if (conflictingSession) {
+        const conflictingStaff = conflictingSession.staff.find(s => staffIds.includes(s.staff_id));
+        return { success: false, message: `Staff ${conflictingStaff?.fname} is already assigned to Session #${conflictingSession.session_id} at this time.` };
+    }
+
+    // 3. Assign if no conflict
     await prisma.joinSession.update({
         where: { session_id: sessionId },
         data: {
@@ -49,4 +100,5 @@ export async function assignStaffToSession(sessionId: number, staffIds: number[]
     });
 
     revalidatePath(`/admin/sessions/${sessionId}`);
+    return { success: true };
 }

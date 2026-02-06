@@ -20,6 +20,7 @@ export default function AssignStaffForm({ bookingId, sessionId, allStaff, initia
     const [selectedCrewIds, setSelectedCrewIds] = useState<number[]>(
         initialAssignedStaff.filter(s => s.role === 'staff').map(s => s.staff_id)
     );
+    const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
 
     const captains = allStaff.filter(s => s.role === 'captain');
@@ -41,11 +42,17 @@ export default function AssignStaffForm({ bookingId, sessionId, allStaff, initia
             ...selectedCrewIds
         ].filter(id => id > 0);
 
-        startTransition(() => {
+        startTransition(async () => {
+            setError(null);
+            let result;
             if (sessionId) {
-                assignStaffToSession(sessionId, staffIds);
+                result = await assignStaffToSession(sessionId, staffIds);
             } else if (bookingId) {
-                assignStaffToBooking(bookingId, staffIds);
+                result = await assignStaffToBooking(bookingId, staffIds);
+            }
+
+            if (result && !result.success) {
+                setError(result.message || "An error occurred during assignment.");
             }
         });
     };
@@ -56,6 +63,13 @@ export default function AssignStaffForm({ bookingId, sessionId, allStaff, initia
                 <Users className="w-4 h-4" />
                 {sessionId ? "Boat Staff (Session)" : "Boat Staff (Booking)"}
             </h2>
+
+            {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-start gap-2">
+                    <div className="min-w-4 pt-0.5">⚠️</div>
+                    <div>{error}</div>
+                </div>
+            )}
 
             <div className="space-y-4">
                 {/* Captain Selection */}

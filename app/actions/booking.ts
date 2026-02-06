@@ -180,6 +180,57 @@ export async function createBooking(prevState: any, formData: FormData) {
 }
 
 export async function assignStaffToBooking(bookingId: number, staffIds: number[]) {
+    // 1. Get Booking Details
+    const booking = await prisma.booking.findUnique({
+        where: { booking_id: bookingId },
+        select: { trip_date: true, time_slot: true }
+    });
+
+    if (!booking) {
+        throw new Error("Booking not found");
+    }
+
+    // 2. Check for conflicts
+    const conflictingBooking = await prisma.booking.findFirst({
+        where: {
+            booking_id: { not: bookingId },
+            trip_date: booking.trip_date,
+            time_slot: booking.time_slot,
+            status: { not: "cancel" },
+            staff: {
+                some: {
+                    staff_id: { in: staffIds }
+                }
+            }
+        },
+        include: { staff: true }
+    });
+
+    if (conflictingBooking) {
+        const conflictingStaff = conflictingBooking.staff.find(s => staffIds.includes(s.staff_id));
+        return { success: false, message: `Staff ${conflictingStaff?.fname} is already assigned to Booking #${conflictingBooking.booking_id} at this time.` };
+    }
+
+    const conflictingSession = await prisma.joinSession.findFirst({
+        where: {
+            trip_date: booking.trip_date,
+            time_slot: booking.time_slot,
+            status: { not: "cancelled" },
+            staff: {
+                some: {
+                    staff_id: { in: staffIds }
+                }
+            }
+        },
+        include: { staff: true }
+    });
+
+    if (conflictingSession) {
+        const conflictingStaff = conflictingSession.staff.find(s => staffIds.includes(s.staff_id));
+        return { success: false, message: `Staff ${conflictingStaff?.fname} is already assigned to Session #${conflictingSession.session_id} at this time.` };
+    }
+
+    // 3. Assign if no conflict
     await prisma.booking.update({
         where: { booking_id: bookingId },
         data: {
@@ -190,4 +241,5 @@ export async function assignStaffToBooking(bookingId: number, staffIds: number[]
     });
 
     revalidatePath(`/admin/bookings/${bookingId}`);
+    return { success: true };
 }

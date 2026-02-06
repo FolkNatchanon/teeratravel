@@ -5,9 +5,21 @@ import { Plus, Trash2, User, UserCheck, Pencil } from "lucide-react";
 import DeleteStaffButton from "@/components/DeleteStaffButton";
 import { formatId } from "@/lib/utils";
 
-export default async function AdminStaffPage() {
+import SortableHeader from "@/components/admin/SortableHeader";
+
+interface AdminStaffPageProps {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function AdminStaffPage(props: AdminStaffPageProps) {
+    const searchParams = await props.searchParams;
+    const sort = (searchParams.sort as string) || "created_at";
+    const order = (searchParams.order as string) === "asc" ? "asc" : "desc";
+
     const staffs = await prisma.staff.findMany({
-        orderBy: { created_at: "desc" },
+        orderBy: sort === "staff_id"
+            ? { staff_id: order === "asc" ? "asc" : "desc" }
+            : { created_at: "desc" }, // Default
         include: {
             bookings: {
                 select: { booking_id: true }
@@ -33,7 +45,7 @@ export default async function AdminStaffPage() {
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 text-gray-500 text-sm">
                             <tr>
-                                <th className="px-6 py-4 font-medium">ID</th>
+                                <th className="px-6 py-4 font-medium"><SortableHeader label="ID" column="staff_id" currentSort={sort} currentOrder={order} /></th>
                                 <th className="px-6 py-4 font-medium">Name</th>
                                 <th className="px-6 py-4 font-medium">Role</th>
                                 <th className="px-6 py-4 font-medium">Active Bookings</th>
@@ -43,8 +55,8 @@ export default async function AdminStaffPage() {
                         <tbody className="divide-y divide-gray-100">
                             {staffs.map((staff) => (
                                 <tr key={staff.staff_id} className="hover:bg-gray-50/50">
-                                    <td className="px-6 py-4 text-gray-900">{formatId(staff.staff_id, 'staff')}</td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 text-sm text-gray-900">{formatId(staff.staff_id, 'staff')}</td>
+                                    <td className="px-6 py-4 text-sm">
                                         <div className="font-medium text-gray-900">{staff.fname} {staff.lname}</div>
                                     </td>
                                     <td className="px-6 py-4">

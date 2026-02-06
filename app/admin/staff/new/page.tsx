@@ -38,7 +38,7 @@ export default function NewStaffPage() {
                                 name="fname"
                                 id="fname"
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                             />
                         </div>
 
@@ -51,7 +51,7 @@ export default function NewStaffPage() {
                                 name="lname"
                                 id="lname"
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                             />
                         </div>
                     </div>
@@ -65,7 +65,7 @@ export default function NewStaffPage() {
                             id="role"
                             required
                             defaultValue="staff"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                         >
                             <option value="staff">Staff (Crew)</option>
                             <option value="captain">Captain</option>

@@ -41,8 +41,7 @@ export default function BoatForm({ boat }: { boat?: Boat }) {
                         name="name"
                         required
                         defaultValue={boat?.name}
-                        className="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300"
-                        placeholder="e.g. The Pearl"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-gray-900 placeholder-gray-400"
                     />
                     {state?.errors?.name && <p className="text-red-500 text-xs mt-1">{state.errors.name[0]}</p>}
                 </div>
@@ -55,7 +54,7 @@ export default function BoatForm({ boat }: { boat?: Boat }) {
                         min={1}
                         required
                         defaultValue={boat?.capacity}
-                        className="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none font-medium text-[14px] text-gray-700 placeholder-gray-300"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-gray-900 placeholder-gray-400"
                     />
                     {state?.errors?.capacity && <p className="text-red-500 text-xs mt-1">{state.errors.capacity[0]}</p>}
                 </div>

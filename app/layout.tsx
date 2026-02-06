@@ -2,6 +2,7 @@
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LayoutWrapper from "@/components/LayoutWrapper";
 import { Inter, Noto_Sans_Thai } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -19,13 +20,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={notoSansThai.className}>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
-        </div>
+        <LayoutWrapper
+          navbar={<Navbar />}
+          footer={<Footer />}
+        >
+          {children}
+        </LayoutWrapper>
       </body>
     </html>
   );

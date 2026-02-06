@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Search, Filter, Eye } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Filter, Eye, Calendar, Package } from "lucide-react";
 import Image from "next/image";
 import DeletePackageButton from "@/components/DeletePackageButton";
 import { formatId } from "@/lib/utils";
+import AdminPageHeader from "@/components/admin/PageHeader";
+import StatusBadge from "@/components/admin/StatusBadge";
+import EmptyState from "@/components/admin/EmptyState";
 
 // Helper to validate image URL
 function getValidImageUrl(url: string | null) {
@@ -24,22 +27,25 @@ export default async function AdminPackagesPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Manage Packages</h1>
-                <Link
-                    href="/admin/packages/new"
-                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    <Plus className="w-4 h-4" />
-                    Add New Package
-                </Link>
-            </div>
+            <AdminPageHeader
+                title="Manage Packages"
+                description="Create and manage travel packages"
+                action={
+                    <Link
+                        href="/admin/packages/new"
+                        className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Add New Package
+                    </Link>
+                }
+            />
 
             <div className="space-y-4">
                 {packages.map((pkg) => (
-                    <div key={pkg.package_id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6">
+                    <div key={pkg.package_id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow">
                         {/* Image */}
-                        <div className="relative w-full md:w-64 h-48 rounded-lg overflow-hidden flex-shrink-0">
+                        <div className="relative w-full md:w-64 h-48 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                             <Image
                                 src={getValidImageUrl(pkg.cover_image_url)}
                                 alt={pkg.name}
@@ -52,27 +58,37 @@ export default async function AdminPackagesPage() {
                         <div className="flex-1 flex flex-col justify-between">
                             <div>
                                 <div className="flex justify-between items-start">
-                                    <td className="px-6 py-4 text-gray-900 font-medium">{formatId(pkg.package_id, 'package')}</td>
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        ${pkg.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                        {pkg.status}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-mono text-sm text-gray-500">{formatId(pkg.package_id, 'package')}</span>
+                                        <h3 className="text-lg font-bold text-gray-900">{pkg.name}</h3>
+                                    </div>
+                                    <StatusBadge status={pkg.status} />
                                 </div>
                                 <div className="mt-2 text-sm text-gray-500 space-y-1">
-                                    <p>Duration: {Number(pkg.duration_hours)} hours</p>
-                                    <p>Boat: {pkg.boat.name} (Max {pkg.boat.capacity} pax)</p>
+                                    <p className="flex items-center gap-2">
+                                        <span className="font-medium">Duration:</span> {Number(pkg.duration_hours)} hours
+                                    </p>
+                                    <p className="flex items-center gap-2">
+                                        <span className="font-medium">Boat:</span> {pkg.boat.name} (Max {pkg.boat.capacity} pax)
+                                    </p>
+                                    <p className="flex items-center gap-2">
+                                        <span className="font-medium">Type:</span> <span className="capitalize">{pkg.type}</span>
+                                    </p>
                                 </div>
                             </div>
 
-                            <div className="mt-4">
-                                <div className="text-lg font-bold text-gray-900">
-                                    ฿{Number(pkg.base_price).toLocaleString()} <span className="text-sm font-normal text-gray-500">/ {pkg.base_member_count} Members</span>
-                                </div>
-                                {Number(pkg.extra_price_per_person) > 0 && (
-                                    <div className="text-sm text-gray-500">
-                                        + ฿{Number(pkg.extra_price_per_person).toLocaleString()} / extra person
+                            <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-end">
+                                <div>
+                                    <div className="text-xl font-bold text-blue-600">
+                                        ฿{Number(pkg.base_price).toLocaleString()}
+                                        <span className="text-sm font-normal text-gray-500 ml-1">/ {pkg.base_member_count} Members</span>
                                     </div>
-                                )}
+                                    {Number(pkg.extra_price_per_person) > 0 && (
+                                        <div className="text-xs text-gray-400 mt-1">
+                                            + ฿{Number(pkg.extra_price_per_person).toLocaleString()} / extra person
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -94,12 +110,7 @@ export default async function AdminPackagesPage() {
                                     className="inline-flex items-center justify-center p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
                                     title="Manage Sessions"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                                    </svg>
+                                    <Calendar className="w-5 h-5" />
                                 </Link>
                             )}
 
@@ -116,16 +127,13 @@ export default async function AdminPackagesPage() {
                 ))}
 
                 {packages.length === 0 && (
-                    <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-100 flex flex-col items-center gap-4">
-                        <p className="text-lg">No packages found</p>
-                        <Link
-                            href="/admin/packages/new"
-                            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium bg-blue-50 px-4 py-2 rounded-lg transition-colors"
-                        >
-                            <Plus className="w-5 h-5" />
-                            Create your first package
-                        </Link>
-                    </div>
+                    <EmptyState
+                        icon={Package}
+                        title="No packages found"
+                        description="Get started by creating your first travel package."
+                        actionLabel="Create Package"
+                        actionHref="/admin/packages/new"
+                    />
                 )}
             </div>
         </div>

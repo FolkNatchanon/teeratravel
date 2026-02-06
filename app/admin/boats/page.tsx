@@ -4,9 +4,21 @@ import { Plus, Pencil, Anchor } from "lucide-react";
 import DeleteBoatButton from "@/components/DeleteBoatButton";
 import { formatId } from "@/lib/utils";
 
-export default async function AdminBoatsPage() {
+import SortableHeader from "@/components/admin/SortableHeader";
+
+interface AdminBoatsPageProps {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function AdminBoatsPage(props: AdminBoatsPageProps) {
+    const searchParams = await props.searchParams;
+    const sort = (searchParams.sort as string) || "boat_id";
+    const order = (searchParams.order as string) === "asc" ? "asc" : "desc";
+
     const boats = await prisma.boat.findMany({
-        orderBy: { boat_id: "desc" },
+        orderBy: sort === "boat_id"
+            ? { boat_id: order }
+            : { boat_id: "desc" }, // Default
         include: { _count: { select: { bookings: true, packages: true } } }
     });
 
@@ -28,7 +40,7 @@ export default async function AdminBoatsPage() {
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 text-gray-500 text-sm">
                             <tr>
-                                <th className="px-6 py-4 font-medium">ID</th>
+                                <th className="px-6 py-4 font-medium"><SortableHeader label="ID" column="boat_id" currentSort={sort} currentOrder={order} /></th>
                                 <th className="px-6 py-4 font-medium">Name</th>
                                 <th className="px-6 py-4 font-medium">Capacity</th>
                                 <th className="px-6 py-4 font-medium">Usage</th>
