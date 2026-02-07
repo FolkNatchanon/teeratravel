@@ -64,7 +64,8 @@ export default async function BookingHistoryPage() {
         }),
         status: (b.status === 'pending' ? 'upcoming' :
             b.status === 'complete' ? 'completed' :
-                'cancelled') as "upcoming" | "completed" | "cancelled",
+                b.status === 'finished' ? 'finished' :
+                    'cancelled') as "upcoming" | "completed" | "cancelled" | "finished",
         price: Number(b.total_price),
         people: b.passenger_count,
         imageSrc: b.package.cover_image_url || "/placeholder.png",

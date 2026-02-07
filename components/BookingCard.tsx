@@ -7,7 +7,7 @@ interface BookingCardProps {
     title: string;
     location: string;
     date: string;
-    status: "upcoming" | "completed" | "cancelled";
+    status: "upcoming" | "completed" | "cancelled" | "finished";
     price: number;
     imageSrc: string;
     people: number;
@@ -38,12 +38,14 @@ export default function BookingCard({
         upcoming: "bg-blue-100 text-blue-800",
         completed: "bg-green-100 text-green-800",
         cancelled: "bg-red-100 text-red-800",
+        finished: "bg-gray-100 text-gray-800",
     };
 
     const statusText = {
         upcoming: "รอดำเนินการ",
         completed: "ยืนยันการจอง",
         cancelled: "ยกเลิก",
+        finished: "เสร็จสิ้น",
     };
 
     return (

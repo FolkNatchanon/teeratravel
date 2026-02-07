@@ -59,19 +59,21 @@ export default function BookingStatusDropdown({ bookingId, currentStatus }: Book
             <select
                 value={selectedStatus}
                 onChange={handleChange}
-                disabled={isPending}
+                disabled={isPending || currentStatus === 'finished'}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium border-0 cursor-pointer focus:ring-2 focus:ring-blue-500 transition-colors
                     ${selectedStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                         selectedStatus === 'complete' ? 'bg-green-100 text-green-800' :
                             selectedStatus === 'finished' ? 'bg-blue-100 text-blue-800' :
                                 'bg-red-100 text-red-800'}
-                    ${isPending ? 'opacity-50 cursor-wait' : ''}`}
+                    ${(isPending || currentStatus === 'finished') ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-                {statusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                        {option.label}
-                    </option>
-                ))}
+                {statusOptions
+                    .filter(option => option.value !== 'finished' || currentStatus === 'finished')
+                    .map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
             </select>
 
             {/* Confirmation Modal */}
