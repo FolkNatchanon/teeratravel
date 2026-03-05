@@ -13,7 +13,7 @@ export default function AdminSidebar() {
     ];
 
     return (
-        <aside className="w-64 bg-slate-900 text-white min-h-screen fixed left-0 top-0 flex flex-col">
+        <aside className="w-full h-full bg-slate-900 text-white flex flex-col">
             <div className="p-6 border-b border-slate-800">
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                     Teera Admin
@@ -33,7 +33,14 @@ export default function AdminSidebar() {
                 ))}
             </nav>
 
-            <div className="p-4 border-t border-slate-800">
+            <div className="p-4 border-t border-slate-800 space-y-2">
+                <Link
+                    href="/"
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
+                    <span>Back to Website</span>
+                </Link>
                 <form action={logout}>
                     <button
                         type="submit"

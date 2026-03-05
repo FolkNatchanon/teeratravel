@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { createBooking } from "@/app/actions/booking";
+import { createBooking, checkBookingAvailability } from "@/app/actions/booking";
 import { Calendar, Users, CheckCircle } from "lucide-react";
 import AuthGuardModal from "./AuthGuardModal";
 
@@ -28,6 +28,8 @@ export default function BookingForm({ packageId, baseMemberCount, extraPricePerP
     const [tripDate, setTripDate] = useState("");
     const [timeSlot, setTimeSlot] = useState("");
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [isChecking, setIsChecking] = useState(false);
+    const [bookingError, setBookingError] = useState("");
 
     // Controlled Passenger State
     const [passengers, setPassengers] = useState([{ id: Date.now(), fname: "", lname: "", age: "", gender: "male" }]);
@@ -40,14 +42,34 @@ export default function BookingForm({ packageId, baseMemberCount, extraPricePerP
     // Validation for Step 1
     const isStep1Valid = tripDate && timeSlot && passengerCount > 0;
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (!isLoggedIn) {
             setShowAuthModal(true);
             return;
         }
 
         if (isStep1Valid) {
-            setStep(2);
+            setIsChecking(true);
+            setBookingError("");
+
+            try {
+                const res = await checkBookingAvailability({
+                    packageId,
+                    tripDate,
+                    timeSlot,
+                    passengerCount
+                });
+
+                if (res.success) {
+                    setStep(2);
+                } else {
+                    setBookingError(res.message || "ไม่สามารถจองได้");
+                }
+            } catch (err) {
+                setBookingError("เกิดข้อผิดพลาดในการตรวจสอบข้อมูล");
+            } finally {
+                setIsChecking(false);
+            }
         } else {
             alert("กรุณากรอกข้อมูลให้ครบถ้วน");
         }
@@ -113,7 +135,7 @@ export default function BookingForm({ packageId, baseMemberCount, extraPricePerP
                                 value={tripDate}
                                 onChange={(e) => setTripDate(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900"
-                                min={new Date().toISOString().split('T')[0]}
+                                min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]}
                             />
                         </div>
                     </div>
@@ -153,12 +175,24 @@ export default function BookingForm({ packageId, baseMemberCount, extraPricePerP
                     </div>
 
                     <div className="pt-4">
+                        {bookingError && (
+                            <div className="mb-4 p-3 rounded-lg text-sm bg-red-100 text-red-700">
+                                {bookingError}
+                            </div>
+                        )}
                         <button
                             type="button"
                             onClick={handleNext}
-                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg active:scale-95 transform duration-200"
+                            disabled={isChecking}
+                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg active:scale-95 transform duration-200 disabled:opacity-50 flex justify-center items-center gap-2"
                         >
-                            ถัดไป
+                            {isChecking && (
+                                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            )}
+                            {isChecking ? "กำลังตรวจสอบ..." : "ถัดไป"}
                         </button>
                     </div>
                 </div>

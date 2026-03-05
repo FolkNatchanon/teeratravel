@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { TimeSlot, Status } from "@prisma/client";
+import { TimeSlot, SessionStatus } from "@prisma/client";
 
 export async function createJoinSession(formData: FormData) {
     const packageId = Number(formData.get("packageId"));
@@ -39,7 +39,7 @@ export async function createJoinSession(formData: FormData) {
     redirect(`/admin/packages/${packageId}/sessions`);
 }
 
-export async function updateJoinSessionStatus(sessionId: number, status: Status, packageId: number) {
+export async function updateJoinSessionStatus(sessionId: number, status: SessionStatus, packageId: number) {
     await prisma.joinSession.update({
         where: { session_id: sessionId },
         data: { status },

@@ -186,16 +186,16 @@ export default function RecommendationWizard({ packages }: { packages: Package[]
                                     )}
                                 </div>
                                 <div className="p-6 flex flex-col flex-grow">
-                                    <div className="flex justify-between items-start mb-2">
+                                    <div className="flex justify-between items-start mb-2 gap-2">
                                         <h3 className="text-xl font-bold text-gray-900 line-clamp-2">{pkg.name}</h3>
-                                        <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full uppercase">
+                                        <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full uppercase shrink-0">
                                             {pkg.score > 0 ? `ตรงใจ ${pkg.score} ข้อ` : 'แนะนำ'}
                                         </span>
                                     </div>
                                     <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-grow">{pkg.description}</p>
-                                    <div className="flex items-center justify-between mt-auto">
+                                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
                                         <span className="text-lg font-bold text-blue-600">฿{pkg.base_price?.toLocaleString()}</span>
-                                        <span className="text-sm text-gray-500 group-hover:text-blue-500 flex items-center gap-1">
+                                        <span className="text-sm text-gray-500 group-hover:text-blue-500 flex items-center gap-1 font-medium">
                                             ดูรายละเอียด <ArrowRight className="w-4 h-4" />
                                         </span>
                                     </div>

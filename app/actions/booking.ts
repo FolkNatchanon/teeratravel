@@ -8,8 +8,17 @@ import { revalidatePath } from "next/cache";
 
 const BookingSchema = z.object({
     packageId: z.coerce.number(),
-    tripDate: z.string().refine((date) => new Date(date) > new Date(), {
-        message: "วันที่เดินทางต้องเป็นวันในอนาคต",
+    tripDate: z.string().refine((date) => {
+        const trip = new Date(date);
+        trip.setHours(0, 0, 0, 0);
+
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        return trip >= tomorrow;
+    }, {
+        message: "ต้องจองล่วงหน้าอย่างน้อย 1 วัน",
     }),
     timeSlot: z.enum(["morning", "afternoon"]),
     passengerCount: z.coerce.number().min(1, "จำนวนผู้โดยสารต้องอย่างน้อย 1 คน"),
@@ -137,9 +146,10 @@ export async function createBooking(prevState: any, formData: FormData) {
         }
 
         // Transaction for Join Session booking to ensure atomicity
+        let createdBookingId: number | undefined;
         await prisma.$transaction(async (tx) => {
             // Create booking
-            await tx.booking.create({
+            const newBooking = await tx.booking.create({
                 data: {
                     user_id: session.userId,
                     package_id: packageId,
@@ -155,6 +165,7 @@ export async function createBooking(prevState: any, formData: FormData) {
                     }
                 },
             });
+            createdBookingId = newBooking.booking_id;
 
             // Update session count if join
             if (joinSessionId) {
@@ -167,16 +178,24 @@ export async function createBooking(prevState: any, formData: FormData) {
             }
         });
 
+        if (createdBookingId) {
+            revalidatePath("/booking-history");
+            redirect(`/payment/${createdBookingId}`);
+        } else {
+            return { message: "ไม่สามารถสร้างการจองได้" };
+        }
+
     } catch (error: any) {
         console.error("Booking error:", error);
         if (error.code === 'P2002') {
             return { message: "เรือไม่ว่างในช่วงเวลาที่เลือก (มีการจองแล้ว)" };
         }
+        // Redirect can throw an error that needs to be re-thrown, but Next.js redirect is a special error type
+        if (error.message && error.message.includes('NEXT_REDIRECT')) {
+            throw error;
+        }
         return { message: "เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง" };
     }
-
-    revalidatePath("/booking-history");
-    redirect("/booking-history?success=true");
 }
 
 export async function assignStaffToBooking(bookingId: number, staffIds: number[]) {
@@ -242,4 +261,95 @@ export async function assignStaffToBooking(bookingId: number, staffIds: number[]
 
     revalidatePath(`/admin/bookings/${bookingId}`);
     return { success: true };
+}
+
+export async function checkBookingAvailability({
+    packageId,
+    tripDate,
+    timeSlot,
+    passengerCount,
+    joinSessionId
+}: {
+    packageId: number;
+    tripDate: string;
+    timeSlot: string;
+    passengerCount: number;
+    joinSessionId?: number;
+}) {
+    try {
+        const pkg = await prisma.package.findUnique({
+            where: { package_id: packageId },
+            include: { boat: true },
+        });
+
+        if (!pkg) {
+            return { success: false, message: "ไม่พบแพ็คเกจที่เลือก" };
+        }
+
+        let finalTripDate = new Date(tripDate);
+        let finalTimeSlot = timeSlot;
+
+        // Check 1 Day Advance
+        const tripDateObj = new Date(finalTripDate);
+        tripDateObj.setHours(0, 0, 0, 0);
+
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        if (tripDateObj < tomorrow) {
+            return { success: false, message: "ต้องจองล่วงหน้าอย่างน้อย 1 วัน" };
+        }
+
+        // JOIN SESSION LOGIC
+        if (joinSessionId) {
+            const joinSession = await prisma.joinSession.findUnique({
+                where: { session_id: joinSessionId },
+            });
+
+            if (!joinSession) {
+                return { success: false, message: "ไม่พบรอบการจองที่เลือก" };
+            }
+
+            if (joinSession.status !== 'active') {
+                return { success: false, message: "รอบการจองนี้ปิดแล้ว" };
+            }
+
+            if (joinSession.current_bookings + passengerCount > joinSession.max_capacity) {
+                return { success: false, message: `ที่นั่งไม่พอ (เหลือ ${joinSession.max_capacity - joinSession.current_bookings} ที่นั่ง)` };
+            }
+        } else {
+            // PRIVATE TRIP LOGIC
+            if (pkg.type === 'join') {
+                return { success: false, message: "แพ็คเกจนี้ต้องเลือกจองตามรอบตารางเวลาเท่านั้น" };
+            }
+
+            // Check boat capacity
+            if (passengerCount > pkg.boat.capacity) {
+                return {
+                    success: false,
+                    message: `จำนวนผู้โดยสารเกินความจุของเรือ (สูงสุด ${pkg.boat.capacity} ท่าน)`,
+                };
+            }
+
+            // Check availability (Private)
+            const existingBooking = await prisma.booking.findFirst({
+                where: {
+                    boat_id: pkg.boat_id,
+                    trip_date: finalTripDate,
+                    time_slot: finalTimeSlot as any,
+                    status: { not: 'cancel' }
+                }
+            });
+
+            if (existingBooking) {
+                return { success: false, message: "เรือไม่ว่างในช่วงเวลาที่เลือก (มีการจองแล้ว)" };
+            }
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error("Check availability error:", error);
+        return { success: false, message: "เกิดข้อผิดพลาดในการตรวจสอบข้อมูล กรุณาลองใหม่อีกครั้ง" };
+    }
 }

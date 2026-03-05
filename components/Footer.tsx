@@ -56,7 +56,7 @@ export default function Footer() {
                         <a href="https://www.instagram.com/teeratravel/" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-600 transition-colors">
                             <Instagram className="w-5 h-5" />
                         </a>
-                        <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-green-500 transition-colors">
+                        <a href="https://line.me/R/ti/p/@teeratravel" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-green-500 transition-colors">
                             <span className="font-bold text-xs">LINE</span>
                         </a>
                     </div>

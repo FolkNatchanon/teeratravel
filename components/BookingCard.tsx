@@ -96,12 +96,22 @@ export default function BookingCard({
                             <p className="text-lg font-bold text-blue-600">฿{price.toLocaleString()}</p>
                         </div>
 
-                        <Link
-                            href={`/booking-history/${id}`}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-                        >
-                            ดูรายละเอียด
-                        </Link>
+                        <div className="flex gap-2">
+                            {status === 'upcoming' && (
+                                <Link
+                                    href={`/payment/${id}`}
+                                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
+                                >
+                                    ชำระเงิน
+                                </Link>
+                            )}
+                            <Link
+                                href={`/booking-history/${id}`}
+                                className="px-4 py-2 border border-blue-600 text-blue-600 hover:bg-blue-50 text-sm font-medium rounded-lg transition-colors"
+                            >
+                                ดูรายละเอียด
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

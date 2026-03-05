@@ -4,6 +4,7 @@ import { User } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { logout } from "@/app/actions/auth";
 import NavLinks from "./NavLinks";
+import MobileMenu from "./MobileMenu";
 
 export default async function Navbar() {
     const session = await getSession();
@@ -23,11 +24,11 @@ export default async function Navbar() {
                     <span className="text-[24px] font-bold tracking-tight text-gray-900">Teera Travel</span>
                 </Link>
 
-                {/* Links */}
+                {/* Desktop Links */}
                 <NavLinks isLoggedIn={!!session} />
 
-                {/* User Profile */}
-                <div className="flex items-center gap-4">
+                {/* User Profile (Desktop Only) */}
+                <div className="hidden md:flex items-center gap-4">
                     {session ? (
                         <>
                             {session.role === 'A' && (
@@ -54,6 +55,9 @@ export default async function Navbar() {
                         </Link>
                     )}
                 </div>
+
+                {/* Mobile Menu Toggle */}
+                <MobileMenu session={session} />
             </div>
         </nav>
     );

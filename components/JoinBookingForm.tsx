@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { createBooking } from "@/app/actions/booking";
+import { createBooking, checkBookingAvailability } from "@/app/actions/booking";
 import { Users, CheckCircle, Calendar, Clock } from "lucide-react";
 import AuthGuardModal from "./AuthGuardModal";
 import { JoinSession } from "@prisma/client";
@@ -26,6 +26,8 @@ export default function JoinBookingForm({ packageId, sessions, isLoggedIn }: Joi
     const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
     const [selectedSession, setSelectedSession] = useState<JoinSession | null>(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [isChecking, setIsChecking] = useState(false);
+    const [bookingError, setBookingError] = useState("");
 
     // Passenger State
     // Default 1 passenger
@@ -46,14 +48,35 @@ export default function JoinBookingForm({ packageId, sessions, isLoggedIn }: Joi
         }
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (!isLoggedIn) {
             setShowAuthModal(true);
             return;
         }
 
         if (selectedSessionId && passengerCount > 0) {
-            setStep(2);
+            setIsChecking(true);
+            setBookingError("");
+
+            try {
+                const res = await checkBookingAvailability({
+                    packageId,
+                    tripDate: new Date(selectedSession!.trip_date).toISOString(),
+                    timeSlot: selectedSession!.time_slot,
+                    passengerCount,
+                    joinSessionId: selectedSessionId
+                });
+
+                if (res.success) {
+                    setStep(2);
+                } else {
+                    setBookingError(res.message || "ไม่สามารถจองได้");
+                }
+            } catch (err) {
+                setBookingError("เกิดข้อผิดพลาดในการตรวจสอบข้อมูล");
+            } finally {
+                setIsChecking(false);
+            }
         } else {
             alert("กรุณาเลือกรอบเดินทาง");
         }
@@ -119,8 +142,8 @@ export default function JoinBookingForm({ packageId, sessions, isLoggedIn }: Joi
                                             key={session.session_id}
                                             onClick={() => !isFull && handleSessionSelect(session)}
                                             className={`p-3 rounded-lg border cursor-pointer transition-all ${selectedSessionId === session.session_id
-                                                    ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
-                                                    : isFull ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                                                ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                                                : isFull ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                                                 }`}
                                         >
                                             <div className="flex justify-between items-center mb-1">
@@ -179,13 +202,24 @@ export default function JoinBookingForm({ packageId, sessions, isLoggedIn }: Joi
                     )}
 
                     <div className="pt-4">
+                        {bookingError && (
+                            <div className="mb-4 p-3 rounded-lg text-sm bg-red-100 text-red-700">
+                                {bookingError}
+                            </div>
+                        )}
                         <button
                             type="button"
                             onClick={handleNext}
-                            disabled={!selectedSessionId || sessions.length === 0}
-                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg active:scale-95 transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={!selectedSessionId || sessions.length === 0 || isChecking}
+                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg active:scale-95 transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                         >
-                            ถัดไป
+                            {isChecking && (
+                                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            )}
+                            {isChecking ? "กำลังตรวจสอบ..." : "ถัดไป"}
                         </button>
                     </div>
                 </div>
