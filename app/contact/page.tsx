@@ -102,7 +102,7 @@ export default function ContactPage() {
                                 </a>
 
                                 <a
-                                    href="#"
+                                    href="https://line.me/R/ti/p/@teeratravel"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex flex-col items-center justify-center gap-3 p-4 bg-[#06C755]/5 text-[#06C755] rounded-xl hover:bg-[#06C755] hover:text-white transition-all group"
