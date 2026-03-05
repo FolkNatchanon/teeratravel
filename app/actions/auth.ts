@@ -11,7 +11,7 @@ const RegisterSchema = z.object({
     lastName: z.string().min(1, "กรุณาระบุนามสกุล"),
     username: z.string().min(3, "ชื่อผู้ใช้ต้องมีความยาวอย่างน้อย 3 ตัวอักษร"),
     email: z.string().email("รูปแบบอีเมลไม่ถูกต้อง"),
-    phone: z.string().min(9, "เบอร์โทรศัพท์ไม่ถูกต้อง"), // Simple check
+    phone: z.string().min(10, "เบอร์โทรศัพท์ต้องมี 10 หลัก").max(10, "เบอร์โทรศัพท์ต้องมี 10 หลักเท่านั้น").regex(/^[0-9]+$/, "เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้น"),
     password: z.string().min(6, "รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร"),
     confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -106,10 +106,18 @@ export async function registerUser(prevState: RegisterState, formData: FormData)
             },
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Registration error:", error);
+
+        let errorMessage = "เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง";
+        if (error?.code === 'P2002') {
+            errorMessage = "อีเมลหรือชื่อผู้ใช้นี้ถูกใช้งานแล้ว";
+        } else if (error?.message) {
+            errorMessage = `เกิดข้อผิดพลาด: โปรดตรวจสอบข้อมูลให้ครบถ้วน`;
+        }
+
         return {
-            message: "เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง",
+            message: errorMessage,
         };
     }
 
