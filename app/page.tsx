@@ -2,8 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, MapPin, Users, Calendar, Instagram, Twitter, Facebook, Star } from "lucide-react";
 
-export const revalidate = 3600;
-
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#F5F7FA]">

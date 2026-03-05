@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createSession, deleteSession } from "@/lib/session";
 
 const RegisterSchema = z.object({
@@ -149,10 +150,12 @@ export async function login(prevState: any, formData: FormData) {
         return { message: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ" };
     }
 
+    revalidatePath("/", "layout");
     redirect("/");
 }
 
 export async function logout() {
     await deleteSession();
+    revalidatePath("/", "layout");
     redirect("/login");
 }
