@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, MapPin, Users, Calendar, Instagram, Twitter, Facebook, Star } from "lucide-react";
+import HighlightGallery from "@/components/HighlightGallery";
 
 export default function Home() {
   return (
@@ -59,45 +60,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Card 1 */}
-            <div className="relative h-80 rounded-2xl overflow-hidden group">
-              <Image src="/Koh_Talu.png" alt="Snorkeling" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white">
-                <div className="flex items-center gap-1 text-xs mb-1 opacity-90"><MapPin className="w-3 h-3" /> เกาะทะลุ จังหวัดประจวบคีรีขันธ์</div>
-                <h3 className="text-xl font-bold mb-1">Snorkeling</h3>
-                <div className="flex items-center gap-1 text-xs text-yellow-400"><Star className="w-3 h-3 fill-current" /> <span className="text-white">4.9 <span className="opacity-70">(8.2k)</span></span></div>
-              </div>
-            </div>
-            {/* Card 2 */}
-            <div className="relative h-80 rounded-2xl overflow-hidden group">
-              <div className="absolute inset-0 bg-cyan-200" /> {/* Placeholder color */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white z-10">
-                <div className="flex items-center gap-1 text-xs mb-1 opacity-90"><MapPin className="w-3 h-3" /> เกาะทะลุ จังหวัดประจวบคีรีขันธ์</div>
-                <h3 className="text-xl font-bold mb-1">Island Hopping</h3>
-                <div className="flex items-center gap-1 text-xs text-yellow-400"><Star className="w-3 h-3 fill-current" /> <span className="text-white">4.8 <span className="opacity-70">(850)</span></span></div>
-              </div>
-            </div>
-            {/* Card 3 */}
-            <div className="relative h-80 rounded-2xl overflow-hidden group">
-              <div className="absolute inset-0 bg-blue-200" /> {/* Placeholder color */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white z-10">
-                <div className="flex items-center gap-1 text-xs mb-1 opacity-90"><MapPin className="w-3 h-3" /> เกาะทะลุ จังหวัดประจวบคีรีขันธ์</div>
-                <h3 className="text-xl font-bold mb-1">Iconic Photo Spot</h3>
-                <div className="flex items-center gap-1 text-xs text-yellow-400"><Star className="w-3 h-3 fill-current" /> <span className="text-white">4.9 <span className="opacity-70">(400)</span></span></div>
-              </div>
-            </div>
-            {/* Card 4 */}
-            <div className="relative h-80 rounded-2xl overflow-hidden group">
-              <div className="absolute inset-0 bg-pink-200" /> {/* Placeholder color */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white z-10">
-                <div className="flex items-center gap-1 text-xs mb-1 opacity-90"><MapPin className="w-3 h-3" /> เกาะทะลุ จังหวัดประจวบคีรีขันธ์</div>
-                <h3 className="text-xl font-bold mb-1">SUP Board</h3>
-                <div className="flex items-center gap-1 text-xs text-yellow-400"><Star className="w-3 h-3 fill-current" /> <span className="text-white">4.7 <span className="opacity-70">(2.5k)</span></span></div>
-              </div>
-            </div>
-          </div>
+          <HighlightGallery />
         </section>
+
 
         {/* 3. Tour Packages Section */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -116,17 +81,17 @@ export default function Home() {
           <div className="h-[450px] bg-slate-200 rounded-3xl overflow-hidden relative">
             {/* Replace with actual package promo image later */}
             <div className="absolute inset-0 flex items-center justify-center text-slate-400 bg-slate-300">
-              <span className="font-bold text-xl">Package 1 Image</span>
+              <Image src="/BestSeller1.jpg" alt="BestSeller1" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
-            <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/30">BEST SELLER</div>
+            <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/30">BEST CHOICE</div>
           </div>
 
           {/* Package 2 */}
           <div className="h-[450px] bg-slate-200 rounded-3xl overflow-hidden relative">
             <div className="absolute inset-0 flex items-center justify-center text-slate-400 bg-blue-300">
-              <span className="font-bold text-xl text-white">Package 2 Image</span>
+              <Image src="/BestSeller2.jpg" alt="BestSeller2" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
-            <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/30">BEST SELLER</div>
+            <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/30">BEST CHOICE</div>
           </div>
         </section>
 

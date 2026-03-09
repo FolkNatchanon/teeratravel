@@ -22,7 +22,7 @@ export default function Footer() {
                     <ul className="space-y-3">
                         <li><Link href="/" className="text-slate-300 hover:text-white transition-colors">หน้าแรก</Link></li>
                         <li><Link href="/packages" className="text-slate-300 hover:text-white transition-colors">แพ็คเกจทัวร์</Link></li>
-                        <li><Link href="/about" className="text-slate-300 hover:text-white transition-colors">เกี่ยวกับเรา</Link></li>
+                        <li><Link href="/booking-history" className="text-slate-300 hover:text-white transition-colors">ประวัติการจองทริป</Link></li>
                         <li><Link href="/contact" className="text-slate-300 hover:text-white transition-colors">ติดต่อเรา</Link></li>
                     </ul>
                 </div>

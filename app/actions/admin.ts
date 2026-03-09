@@ -121,7 +121,7 @@ export async function updatePackageAction(prevState: any, formData: FormData) {
 
     revalidatePath("/admin/packages");
     revalidatePath(`/admin/packages/${packageId}`);
-    return { message: "Package updated successfully" };
+    redirect("/admin/packages");
 }
 
 export async function updateBookingStatus(formData: FormData) {
